@@ -1,0 +1,142 @@
+[
+  {
+    "n": 64,
+    "implementation": "cdls",
+    "dispatches": 1,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 64,
+    "implementation": "rocsolver",
+    "dispatches": 2,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 512,
+    "implementation": "cdls",
+    "dispatches": 4,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 512,
+    "implementation": "rocsolver",
+    "dispatches": 96,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 2048,
+    "implementation": "cdls",
+    "dispatches": 4,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 2048,
+    "implementation": "rocsolver",
+    "dispatches": 486,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 4096,
+    "implementation": "cdls",
+    "dispatches": 4,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 4096,
+    "implementation": "rocsolver",
+    "dispatches": 994,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 4096,
+    "implementation": "static",
+    "dispatches": 4,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 8192,
+    "implementation": "cdls",
+    "dispatches": 36,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 3774,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 8192,
+    "implementation": "rocsolver",
+    "dispatches": 2010,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 8192,
+    "implementation": "static",
+    "dispatches": 4,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 32768,
+    "implementation": "cdls",
+    "dispatches": 228,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  },
+  {
+    "n": 32768,
+    "implementation": "rocsolver",
+    "dispatches": 8106,
+    "one_roi": true,
+    "all_dispatches_correlate_to_roi_hip_calls": true,
+    "timestamp_tolerance_ns": 10000,
+    "max_end_overrun_ns": 0,
+    "no_copy_allocation_in_roi": true
+  }
+]

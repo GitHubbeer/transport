@@ -1,0 +1,4 @@
+n,cdls_residual_scaled,roc_pivot_residual_scaled,cdls_residual_pass,roc_pivot_residual_pass,info,joint_validation
+64,17.31,0.033857,True,True,7/0,True
+512,12.398,0.028143,True,True,7/0,True
+2048,142.89,0.031522,False,True,7/0,False

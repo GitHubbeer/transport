@@ -1,0 +1,5 @@
+"Kind","Agent_Id","Queue_Id","Thread_Id","Dispatch_Id","Kernel_Id","Kernel_Name","Correlation_Id","Start_Timestamp","End_Timestamp","Private_Segment_Size","Group_Segment_Size","Workgroup_Size_X","Workgroup_Size_Y","Workgroup_Size_Z","Grid_Size_X","Grid_Size_Y","Grid_Size_Z"
+"KERNEL_DISPATCH",1,1,234832,1,10,"__amd_rocclr_fillBufferAligned",23099,6448480742628168,6448480742631213,0,0,256,1,1,256,1,1
+"KERNEL_DISPATCH",1,1,234832,3,10,"__amd_rocclr_fillBufferAligned",23100,6448480742647277,6448480742649280,0,0,256,1,1,256,1,1
+"KERNEL_DISPATCH",1,1,234832,2,10,"__amd_rocclr_fillBufferAligned",23100,6448480742640066,6448480742642951,0,0,256,1,1,1024,1,1
+"KERNEL_DISPATCH",1,1,234832,4,11,"void cdls::rocm_detail::getrf::(anonymous namespace)::getrf_kernel<256, true, false, true>(int, double*, long, int, int, int*, int*, int*, int, int*, double)",23103,6448480742658695,6448480749284045,0,49920,256,1,1,1048576,1,1

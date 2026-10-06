@@ -1,0 +1,4 @@
+phase,method,reference,matrix,n,lda,offset,trial,log,validated,samples,warmup,cdls_ms,roc_ms,speedup,workspace_bytes,roc_workspace_bytes
+size,auto,npvt,dense,2048,2048,0,1,size-t1-auto-npvt-dense-n2048-lda2048-off0.log,True,30,5,1.731290996,4.269848108,2.4662798558215338,4104,8930496
+size,auto,npvt,dense,2048,2048,0,2,size-t2-auto-npvt-dense-n2048-lda2048-off0.log,True,30,5,1.7160875199999999,4.3204100135,2.5175930499745145,4104,8930496
+size,auto,npvt,dense,2048,2048,0,3,size-t3-auto-npvt-dense-n2048-lda2048-off0.log,True,30,5,1.702166498,4.222586155,2.480712762212995,4104,8930496

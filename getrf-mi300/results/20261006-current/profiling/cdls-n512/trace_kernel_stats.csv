@@ -1,0 +1,3 @@
+"Name","Calls","TotalDurationNs","AverageNs","Percentage","MinNs","MaxNs","StdDev"
+"void cdls::rocm_detail::getrf::(anonymous namespace)::getrf_kernel<512, true, false, false>(int, double*, long, int, int, int*, int*, int*, int, int*, double)",1,361593,361593.000000,98.38,361593,361593,0.00000000e+00
+"__amd_rocclr_fillBufferAligned",3,5969,1989.666667,1.62,1843,2203,189.032625

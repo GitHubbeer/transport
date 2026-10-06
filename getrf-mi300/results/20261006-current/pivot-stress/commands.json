@@ -1,0 +1,47 @@
+[
+  {
+    "n": 64,
+    "argv": [
+      "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/benchmark",
+      "--n",
+      "64",
+      "--matrix",
+      "random",
+      "--reference",
+      "pivot",
+      "--validate-only"
+    ],
+    "returncode": 0,
+    "log": "n64.log"
+  },
+  {
+    "n": 512,
+    "argv": [
+      "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/benchmark",
+      "--n",
+      "512",
+      "--matrix",
+      "random",
+      "--reference",
+      "pivot",
+      "--validate-only"
+    ],
+    "returncode": 0,
+    "log": "n512.log"
+  },
+  {
+    "n": 2048,
+    "argv": [
+      "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/benchmark",
+      "--n",
+      "2048",
+      "--matrix",
+      "random",
+      "--reference",
+      "pivot",
+      "--validate-only"
+    ],
+    "returncode": 1,
+    "log": "n2048.log"
+  }
+]

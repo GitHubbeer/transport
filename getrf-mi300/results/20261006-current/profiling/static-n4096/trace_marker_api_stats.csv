@@ -1,0 +1,4 @@
+"Name","Calls","TotalDurationNs","AverageNs","Percentage","MinNs","MaxNs","StdDev"
+"GETRF_FACTORIZATION",1,6690317,6690317.000000,99.93,6690317,6690317,0.00000000e+00
+"roctxProfilerResume",1,3986,3986.000000,0.0595,3986,3986,0.00000000e+00
+"roctxProfilerPause",2,740,370.000000,0.0111,360,380,14.142136

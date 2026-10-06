@@ -1,0 +1,9 @@
+E20261006 02:35:44.608743 137425394573568 output_stream.cpp:105] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/profiling/cdls-n64/trace_kernel_stats.csv
+E20261006 02:35:44.614451 137425394573568 output_stream.cpp:105] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/profiling/cdls-n64/trace_kernel_trace.csv
+E20261006 02:35:44.673941 137425394573568 output_stream.cpp:105] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/profiling/cdls-n64/trace_hip_api_stats.csv
+E20261006 02:35:44.679423 137425394573568 output_stream.cpp:105] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/profiling/cdls-n64/trace_hip_api_trace.csv
+E20261006 02:35:44.833386 137425394573568 output_stream.cpp:105] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/profiling/cdls-n64/trace_marker_api_stats.csv
+E20261006 02:35:44.837234 137425394573568 output_stream.cpp:105] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/profiling/cdls-n64/trace_marker_api_trace.csv
+E20261006 02:35:44.845248 137425394573568 output_stream.cpp:105] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/profiling/cdls-n64/trace_agent_info.csv
+E20261006 02:35:44.849235 137425394573568 output_stream.cpp:105] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current/profiling/cdls-n64/trace_domain_stats.csv
+profile n=64 implementation=cdls

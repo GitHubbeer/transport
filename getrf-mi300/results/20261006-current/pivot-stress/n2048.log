@@ -1,0 +1,2 @@
+device=AMD Instinct MI300A arch=gfx942:sramecc+:xnack- HIP=60443484 CUs=228 memory_bytes=137438953472 rocSOLVER=3.28.2.1b897f5 rocBLAS=4.4.1.f08d23e3 baseline=rocsolver_dgetrf fp64 seed=20261001 method=auto matrix=random n=2048 lda=0 offset=0 warmup=5 repeats=30
+validate n=2048 lda=2048 kind=random info=7/0 L_rel=2.4618e+03 U_rel=2.2526e+03 residual_scaled=1.4289e+02/3.1522e-02 FAIL

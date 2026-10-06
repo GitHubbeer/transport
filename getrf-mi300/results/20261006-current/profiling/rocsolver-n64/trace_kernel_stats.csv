@@ -1,0 +1,3 @@
+"Name","Calls","TotalDurationNs","AverageNs","Percentage","MinNs","MaxNs","StdDev"
+"void rocsolver::v32802::getf2_npvt_panel_kernel<double, int, int, double*>(int, int, double*, long, int, long, int*, int, int)",1,73592,73592.000000,97.56,73592,73592,0.00000000e+00
+"void rocsolver::v32802::reset_info<int, int, int>(int*, int, int, int)",1,1843,1843.000000,2.44,1843,1843,0.00000000e+00

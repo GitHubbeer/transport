@@ -1,0 +1,7 @@
+"Name","Calls","TotalDurationNs","AverageNs","Percentage","MinNs","MaxNs","StdDev"
+"__hipRegisterFunction",22793,4783886,209.883999,96.19,100,281321,2006.754250
+"__hipRegisterFatBinary",302,83467,276.380795,1.68,50,24858,1451.453662
+"hipStreamSynchronize",1,78130,78130.000000,1.57,78130,78130,0.00000000e+00
+"hipLaunchKernel",2,27281,13640.500000,0.5486,8643,18638,7067.532278
+"__hipPushCallConfiguration",2,190,95.000000,3.821e-03,80,110,21.213203
+"__hipPopCallConfiguration",2,180,90.000000,3.619e-03,70,110,28.284271

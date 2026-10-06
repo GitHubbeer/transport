@@ -1,0 +1,4 @@
+phase,method,reference,matrix,n,lda,offset,trial,log,validated,info,L_rel,U_rel,cdls_residual_scaled,roc_residual_scaled,pass_validation
+size,auto,npvt,dense,2048,2048,0,1,size-t1-auto-npvt-dense-n2048-lda2048-off0.log,True,7/0,8.1213e-16,2.0337e-15,0.0043742,0.0012203,True
+size,auto,npvt,dense,2048,2048,0,2,size-t2-auto-npvt-dense-n2048-lda2048-off0.log,True,7/0,8.1213e-16,2.0337e-15,0.0043742,0.0012203,True
+size,auto,npvt,dense,2048,2048,0,3,size-t3-auto-npvt-dense-n2048-lda2048-off0.log,True,7/0,8.1213e-16,2.0337e-15,0.0043742,0.0012203,True

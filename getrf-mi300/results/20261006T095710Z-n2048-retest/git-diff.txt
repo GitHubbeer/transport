@@ -1,0 +1,1818 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3a44ae5..97b79b1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,7 @@
+-cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
+ 
+ project(CDLS LANGUAGES CXX VERSION 0.0.0)
++include(GNUInstallDirs)
+ 
+ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+     message(STATUS "Setting build type to 'Release' as none was specified.")
+@@ -10,6 +11,7 @@ endif ()
+ 
+ option(CDLS_ENABLE_EXAMPLES "Enable examples" ON)
+ option(CDLS_ENABLE_OSDI26 "Enable visualization in OSDI '26 paper" OFF)
++option(CDLS_ENABLE_TESTS "Enable GETRF scheduling and numerical tests" OFF)
+ 
+ set(_DISABLE_INSTALLATION ON)
+ 
+@@ -55,50 +57,16 @@ endif ()
+ 
+ if (HAVE_ROCM_COMPILER)
+     find_package(hip REQUIRED)
+-    find_package(hiprtc REQUIRED)
+-
+-    find_package(OpenMP QUIET)
+-    if (NOT OpenMP_FOUND)
+-        message(STATUS "OpenMP is not available, Checking if rocWMMA patch needs to be applied...")
+-
+-        set(ROCWMMA_PATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/patch/rocwmma-disable-omp.6.4.2.patch")
+-        set(ROCWMMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/rocWMMA")
+-
+-        # Check if the patch can be applied cleanly (i.e., it hasn't been applied yet)
+-        execute_process(
+-                COMMAND git apply --check --quiet "${ROCWMMA_PATCH_FILE}"
+-                WORKING_DIRECTORY "${ROCWMMA_DIR}"
+-                RESULT_VARIABLE check_result
+-        )
+-
+-        if (check_result EQUAL 0)
+-            message(STATUS "Patch has not been applied yet. Applying now...")
+-            execute_process(
+-                    COMMAND git apply "${ROCWMMA_PATCH_FILE}"
+-                    WORKING_DIRECTORY "${ROCWMMA_DIR}"
+-                    RESULT_VARIABLE apply_result
+-                    OUTPUT_VARIABLE apply_output
+-                    ERROR_VARIABLE apply_error
+-            )
+-
+-            if (NOT apply_result EQUAL 0)
+-                message(FATAL_ERROR "Failed to apply rocWMMA patch:\n${apply_error}\n${apply_output}")
+-            else ()
+-                message(STATUS "Successfully applied rocWMMA patch.")
+-            endif ()
+-        else ()
+-            message(STATUS "rocWMMA patch already applied or not needed.")
+-        endif ()
+-    endif ()
+-
+-    set(ROCWMMA_BUILD_SAMPLES OFF)
+-    set(ROCWMMA_BUILD_TESTS OFF)
+-    add_subdirectory(third_party/rocWMMA)
+ 
++    set(CMAKE_HIP_ARCHITECTURES "gfx942" CACHE STRING "ROCm GETRF GPU architectures")
++    enable_language(HIP)
++    find_package(rocblas REQUIRED)
+     add_subdirectory(src/rocm)
++endif ()
+ 
+-    target_include_directories(cdls_rocm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/third_party/cutlass/include/)
+-    target_include_directories(cdls_rocm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/rocm/cuda_wrapper)
++if (CDLS_ENABLE_TESTS)
++    enable_testing()
++    add_subdirectory(tests)
+ endif ()
+ 
+ if (HAVE_CUDA_COMPILER)
+diff --git a/README.md b/README.md
+index dec3ac8..144eab8 100644
+--- a/README.md
++++ b/README.md
+@@ -1,2 +1,52 @@
+ # cdls
+-the core dense linear solvers
++
++The core dense linear solvers. GETRF computes square, FP64, column-major,
++in-place LU factors with unit diagonal L. Both backends retain the existing
++no-pivot and static-pivot entry points in `include/cdls/getrf.h`.
++
++CUDA and ROCm share algorithm code in `src/common/getrf`:
++
++| File | Shared work |
++| --- | --- |
++| `schedule.h` | Dependency-ordered panel borders and bounded diagonal lookahead |
++| `panel.h` | LU panel writeback, U12 solve, and active trailing-corner update |
++| `triangular.h` | Forward substitution for Lx=B and xU=B through oriented views |
++| `numeric.h` | Guarded exact reciprocals and triangular diagonal modes |
++| `static_pivot.h` | Next-pivot replacement and replacement counting |
++| `hybrid.h` | Prefix LU/TRSM followed by BLAS updates and a fused tail |
++
++CUDA retains its CuTe MMA, asynchronous copies, register-LU recovery and
++measured A100 dispatch settings. ROCm uses the optimized CK MFMA implementation,
++padded LDS, packed triangular coefficients, wave64/DPP broadcasts and MI300
++dispatch settings. Backend atomics, publication barriers and matrix updates
++remain local. Floating-point evaluation order can differ between backends.
++
++ROCm requires wave64 `gfx90a`, `gfx940`, `gfx941` or `gfx942` (the default).
++CK headers are fetched at a pinned ROCm 6.4.2 revision, or supplied through
++`CDLS_CK_SOURCE_DIR`; rocWMMA and CUDA compatibility wrappers are no longer
++needed for ROCm GETRF. Matrix addresses and strides remain 64-bit; task counts
++must fit a signed int. `cdlsDgetrf_bufferSize` returns the backend's workspace
++requirement. The no-pivot call leaves `pivot_count` untouched; the static-pivot
++call adds its replacements to the caller's device counter.
++
++For a ROCm-only build and validation:
++
++```bash
++cmake -S . -B build/getrf \
++  -DCMAKE_PREFIX_PATH="$ROCM_PATH" \
++  -DCMAKE_HIP_COMPILER="$ROCM_PATH/llvm/bin/clang++" \
++  -DCMAKE_HIP_ARCHITECTURES=gfx942 \
++  -DCMAKE_DISABLE_FIND_PACKAGE_CUDAToolkit=ON \
++  -DCDLS_ENABLE_TESTS=ON
++cmake --build build/getrf -j4
++ctest --test-dir build/getrf --output-on-failure
++```
++
++Add `-DCDLS_CK_SOURCE_DIR=/path/to/composable_kernel` to use an existing checkout.
++For CUDA, configure with the CUDA toolkit and `CMAKE_CUDA_ARCHITECTURES=80`
++or a supported newer architecture. `CDLS_ENABLE_TESTS` builds the same GPU
++numerical test for each available backend, plus a portable task-order test.
++Validation covers tile and dispatch boundaries, hybrid sizes, padded/misaligned
++matrix origins, workspace reuse, static-pivot counters and extreme scales.
++Small matrices use full LU reconstruction; large matrices use three independent
++signed projections with a relative residual tolerance of `2e-11`.
+diff --git a/examples/rocm/CMakeLists.txt b/examples/rocm/CMakeLists.txt
+index 5f5d6ea..c8ab10c 100644
+--- a/examples/rocm/CMakeLists.txt
++++ b/examples/rocm/CMakeLists.txt
+@@ -1,8 +1,8 @@
+ add_executable(cdls_rocm_dgetrf dgetrf.cpp)
++set_source_files_properties(dgetrf.cpp PROPERTIES LANGUAGE HIP)
++set_target_properties(cdls_rocm_dgetrf PROPERTIES HIP_STANDARD 17 HIP_STANDARD_REQUIRED ON)
+ 
+ target_link_libraries(cdls_rocm_dgetrf PUBLIC
+-        rocwmma
+-        hiprtc::hiprtc
+         roc::rocthrust
+         roc::rocblas
+         roc::rocsolver
+diff --git a/include/cdls/getrf.h b/include/cdls/getrf.h
+index 564f5d4..c1413e1 100644
+--- a/include/cdls/getrf.h
++++ b/include/cdls/getrf.h
+@@ -1,4 +1,5 @@
+ #pragma once
++#include <stddef.h>
+ #include <cdls/common.h>
+ 
+ #if defined(__cplusplus)
+diff --git a/src/cuda/getrf.cu b/src/cuda/getrf.cu
+index 13c35db..0e84659 100644
+--- a/src/cuda/getrf.cu
++++ b/src/cuda/getrf.cu
+@@ -3,6 +3,7 @@
+ #include <algorithm>
+ #include <climits>
+ 
++#include "../common/getrf/hybrid.h"
+ #include "getrf/small.cuh"
+ #include "getrf/tiled.cuh"
+ #include "handle.h"
+@@ -44,31 +45,31 @@ cdlsStatus_t getrf_no_pivot(cdlsHandle_t handle, long n, double* matrix,
+   // prefix work against the tail's single-CTA configuration.
+ 
+   const double minus = -1.0, plus = 1.0;
+-  long offset = 0;
+-  while (n - offset > kFusedMaxExtent) {
+-    const long remaining = n - offset;
+-    // Prefixes must end at a complete 64-row tile.
+-    const long width = std::min<long>(
+-        kHybridPanelExtent,
+-        ((remaining - kHybridTargetTailExtent + kTileExtent - 1) /
+-         kTileExtent) *
+-            kTileExtent);
+-    auto* base = matrix + offset + offset * lda;
+-    const int panels = static_cast<int>(width / kTileExtent);
+-    const auto status = Prefix::call(remaining, base, lda, workspace,
+-                                     pivot_count, 0.0, stream, panels);
+-    if (status != CDLS_STATUS_SUCCESS) return status;
+-    const int trailing = static_cast<int>(remaining - width);
+-    if (cublasDgemm(blas, CUBLAS_OP_N, CUBLAS_OP_N, trailing, trailing,
+-                    static_cast<int>(width), &minus, base + width,
+-                    static_cast<int>(lda), base + width * lda,
+-                    static_cast<int>(lda), &plus, base + width + width * lda,
+-                    static_cast<int>(lda)) != CUBLAS_STATUS_SUCCESS)
+-      return CDLS_STATUS_EXECUTION_FAILED;
+-    offset += width;
+-  }
+-  return Fused::call(n - offset, matrix + offset + offset * lda, lda,
+-                      workspace, pivot_count, 0.0, stream, 0);
++  return cdls::detail::getrf::factorize_hybrid(
++      n, matrix, lda, kFusedMaxExtent, kTileExtent,
++      [](long remaining) {
++        return std::min<long>(
++            kHybridPanelExtent,
++            ((remaining - kHybridTargetTailExtent + kTileExtent - 1) /
++             kTileExtent) *
++                kTileExtent);
++      },
++      [&](long remaining, double* base, int panels) {
++        if (panels == 0)
++          return Fused::call(remaining, base, lda, workspace, pivot_count, 0.0,
++                             stream, 0);
++        return Prefix::call(remaining, base, lda, workspace, pivot_count, 0.0,
++                            stream, panels);
++      },
++      [&](double* base, int trailing, int width) {
++        return cublasDgemm(blas, CUBLAS_OP_N, CUBLAS_OP_N, trailing, trailing,
++                           width, &minus, base + width, static_cast<int>(lda),
++                           base + width * lda, static_cast<int>(lda), &plus,
++                           base + width + width * lda,
++                           static_cast<int>(lda)) == CUBLAS_STATUS_SUCCESS
++                   ? CDLS_STATUS_SUCCESS
++                   : CDLS_STATUS_EXECUTION_FAILED;
++      });
+ }
+ }  // namespace
+ 
+diff --git a/src/cuda/getrf/diagonal.cuh b/src/cuda/getrf/diagonal.cuh
+index 34c6de4..88f63fa 100644
+--- a/src/cuda/getrf/diagonal.cuh
++++ b/src/cuda/getrf/diagonal.cuh
+@@ -3,6 +3,8 @@
+ #include <cuda/atomic>
+ #include <cute/tensor.hpp>
+ 
++#include "../../common/getrf/panel.h"
++#include "../../common/getrf/static_pivot.h"
+ #include "config.cuh"
+ #include "numeric.cuh"
+ 
+@@ -96,74 +98,19 @@ CUTE_DEVICE bool try_register_lu(const int tid, TensorSmem& c,
+   return __syncthreads_or(unsafe) == 0;
+ }
+ 
+-template <class TensorSmem>
+-CUTE_DEVICE void factor_with_static_pivot(
+-    const unsigned thread_idx, TensorSmem& smem,
+-    cuda::atomic<int>* const pivot_count_ptr,
+-    const typename TensorSmem::value_type criterion) {
+-  using namespace cute;
+-
+-  CUTE_STATIC_ASSERT_V(rank(smem) == _2{});
+-
+-  CUTE_STATIC_ASSERT_V(size<0>(smem) == Int<kTileExtent>{});
+-  CUTE_STATIC_ASSERT_V(size<1>(smem) == Int<kTileExtent>{});
+-  using T = typename TensorSmem::value_type;
+-
+-  const auto thread_row = thread_idx % kRegisterAxis;
+-  const auto thread_col = thread_idx / kRegisterAxis;
+-
+-  CUTE_UNROLL
+-  for (unsigned diag_idx = 0; diag_idx < kTileExtent; ++diag_idx) {
+-    const auto block_size = kRegisterValues - diag_idx / kRegisterAxis;
+-    // block size is up to kRegisterValues
+-    T l[kRegisterValues], u[kRegisterValues];
+-    bool pred_row[kRegisterValues] = {false, false, false, false};
+-    bool pred_col[kRegisterValues] = {false, false, false, false};
+-
+-    if (1 + diag_idx + thread_idx < kTileExtent) {
+-      smem(1 + diag_idx + thread_idx, diag_idx) /= smem(diag_idx, diag_idx);
+-    }
+-    __syncthreads();
+-
+-    CUTE_UNROLL
+-    for (unsigned i = 0; i < block_size; ++i) {
+-      if (1 + diag_idx + i * kRegisterAxis + thread_row < kTileExtent) {
+-        l[i] = smem(1 + diag_idx + i * kRegisterAxis + thread_row, diag_idx);
+-        pred_row[i] = true;
+-      }
+-      if (1 + diag_idx + i * kRegisterAxis + thread_col < kTileExtent) {
+-        u[i] = smem(diag_idx, 1 + diag_idx + i * kRegisterAxis + thread_col);
+-        pred_col[i] = true;
+-      }
+-    }
+-
+-    CUTE_UNROLL
+-    for (unsigned row = 0; row < block_size; ++row) {
+-      CUTE_UNROLL
+-      for (unsigned col = 0; col < block_size; ++col) {
+-        if (pred_row[row] && pred_col[col]) {
+-          auto value = smem(1 + diag_idx + row * kRegisterAxis + thread_row,
+-                            1 + diag_idx + col * kRegisterAxis + thread_col);
+-          value -= l[row] * u[col];
+-          if (thread_idx == 0 && row == 0 && col == 0) {
+-            if (std::abs(value) < criterion) {
+-              if (value < 0) {
+-                value = -criterion;
+-              } else {
+-                value = criterion;
+-              }
+-              pivot_count_ptr->fetch_add(
+-                  1, cuda::memory_order::memory_order_relaxed);
+-            }
+-          }
+-          smem(1 + diag_idx + row * kRegisterAxis + thread_row,
+-               1 + diag_idx + col * kRegisterAxis + thread_col) = value;
+-        }
+-      }
+-    }
+-
+-    __syncthreads();
++struct CudaPivotCount {
++  cuda::atomic<int>* value;
++  CUTE_DEVICE void increment() const {
++    value->fetch_add(1, cuda::memory_order_relaxed);
+   }
++};
++template <class TensorSmem>
++CUTE_DEVICE void factor_with_static_pivot(unsigned tid, TensorSmem& tile,
++                                          cuda::atomic<int>* count,
++                                          double criterion) {
++  cdls::detail::getrf::factor_with_static_pivot<kTileExtent, kRegisterAxis,
++                                                kTileThreads>(
++      tid, kTileExtent, tile, CudaPivotCount{count}, criterion);
+ }
+ 
+ // Inner-panel organization adapted from ck_getrf::diagonal (AMD).
+@@ -192,44 +139,8 @@ CUTE_DEVICE void lu_panel(const int tid, const int bound, TensorSmem& c) {
+     }
+     // Readers must finish before panel writeback can overwrite published rows.
+     __syncthreads();
+-    if (tid < kTileExtent) {
+-#pragma unroll
+-      for (int j = 0; j < P; ++j) c(tid, p + j) = x[j];
+-    }
+-    __syncthreads();
+-    // U12 = inv(L11) * A12, one RHS column per thread.
+-    if (tid >= p + P && tid < bound) {
+-#pragma unroll
+-      for (int k = 0; k < P; ++k) {
+-        double value = c(p + k, tid);
+-#pragma unroll
+-        for (int j = 0; j < k; ++j) value -= c(p + k, p + j) * x[j];
+-        x[k] = value;
+-      }
+-#pragma unroll
+-      for (int k = 0; k < P; ++k) c(p + k, tid) = x[k];
+-    }
+-    __syncthreads();
+-    const int start = p + P;
+-    const int remaining = max(0, bound - start);
+-    static_assert(kTileExtent == 64,
+-                  "Partial-update lane mapping requires 64 rows");
+-    const int shift = remaining <= 8               ? 3
+-                      : remaining <= kRegisterAxis ? 4
+-                      : remaining <= 32            ? 5
+-                                                   : 6;
+-    const int span = 1 << shift;
+-    for (int idx = tid; idx < span * remaining; idx += kTileThreads) {
+-      const int row = start + (idx & (span - 1));
+-      const int col = start + (idx >> shift);
+-      if (row < bound) {
+-        double value = c(row, col);
+-#pragma unroll
+-        for (int k = 0; k < P; ++k) value -= c(row, p + k) * c(p + k, col);
+-        c(row, col) = value;
+-      }
+-    }
+-    __syncthreads();
++    cdls::detail::getrf::finish_lu_panel<kTileExtent, P, kTileThreads>(
++        tid, p, bound, c, x);
+   }
+ }
+ 
+diff --git a/src/cuda/getrf/numeric.cuh b/src/cuda/getrf/numeric.cuh
+index e12c8df..797bea8 100644
+--- a/src/cuda/getrf/numeric.cuh
++++ b/src/cuda/getrf/numeric.cuh
+@@ -1,16 +1,6 @@
+ #pragma once
+-
+-#include <cmath>
+-#include <cute/config.hpp>
++#include "../../common/getrf/numeric.h"
+ 
+ namespace cdls::cuda_detail::getrf {
+-
+-// This symmetric interval is closed under reciprocation. A cached reciprocal
+-// stays in the interval; an unmodified extreme diagonal stays outside it.
+-// Zero, infinities, and NaNs therefore use the original division path.
+-CUTE_DEVICE bool reciprocal_safe(double value) {
+-  const double magnitude = fabs(value);
+-  return magnitude >= 0x1p-500 && magnitude <= 0x1p500;
+-}
+-
++using cdls::detail::getrf::reciprocal_safe;
+ }  // namespace cdls::cuda_detail::getrf
+diff --git a/src/cuda/getrf/schedule.cuh b/src/cuda/getrf/schedule.cuh
+index 1fdcd28..24fcc5c 100644
+--- a/src/cuda/getrf/schedule.cuh
++++ b/src/cuda/getrf/schedule.cuh
+@@ -5,6 +5,7 @@
+ #include <cute/config.hpp>
+ #include <limits>
+ 
++#include "../../common/getrf/schedule.h"
+ #include "config.cuh"
+ 
+ namespace cdls::cuda_detail::getrf {
+@@ -37,32 +38,7 @@ struct TaskWorkspace {
+   }
+ };
+ 
+-// Pure scheduling result; independent of tensor layouts and host-only tuples.
+-template <class Index>
+-struct TileCoord {
+-  Index row;
+-  Index col;
+-};
+-
+-template <typename IndexType>
+-CUTE_HOST_DEVICE TileCoord<IndexType> index_to_coord(const IndexType index,
+-                                                     const IndexType M) {
+-  // Find the last panel whose first task does not exceed index. The upper
+-  // sentinel M starts beyond every valid task, so no equality/exit case is needed.
+-  IndexType left = 0, right = M;
+-  while (left + 1 < right) {
+-    const IndexType mid = left + (right - left) / 2;
+-    if (mid * (2 * M - mid) <= index)
+-      left = mid;
+-    else
+-      right = mid;
+-  }
+-  const IndexType k = left;
+-  const IndexType base = k * (2 * M - k);
+-
+-  const IndexType offset = index - base;
+-  return (offset & 1) ? TileCoord<IndexType>{k + (offset + 1) / 2, k}
+-                      : TileCoord<IndexType>{k, k + offset / 2};
+-}
++using cdls::detail::getrf::index_to_coord;
++using cdls::detail::getrf::TileCoord;
+ 
+ }  // namespace cdls::cuda_detail::getrf
+diff --git a/src/cuda/getrf/triangular.cuh b/src/cuda/getrf/triangular.cuh
+index 6479224..bc06faa 100644
+--- a/src/cuda/getrf/triangular.cuh
++++ b/src/cuda/getrf/triangular.cuh
+@@ -2,95 +2,35 @@
+ 
+ #include <cute/tensor.hpp>
+ 
++#include "../../common/getrf/triangular.h"
+ #include "config.cuh"
+ #include "numeric.cuh"
+ 
+ namespace cdls::cuda_detail::getrf {
+ 
+-// Unit diagonals belong to L; U uses raw, mixed, or validated reciprocal
+-// values.
+-enum class TriangularDiagonal {
+-  unit,
+-  raw,
+-  mixed_reciprocals,
+-  safe_reciprocals
+-};
+-
+-// Four adjacent lanes cooperate on one RHS. Both Lx=B and xU=B use this
+-// forward-substitution recurrence; xU is U^T x^T = B^T in transposed views.
+-template <TriangularDiagonal diagonal_mode, class TensorLSmem,
+-          class TensorXSmem, class TensorXGmem>
+-CUTE_DEVICE void forward_solve_tile(const unsigned thread_idx, const int bound,
+-                                    const TensorLSmem& l_smem,
+-                                    TensorXSmem& x_smem, TensorXGmem& x_gmem) {
+-  using namespace cute;
+-
+-  CUTE_STATIC_ASSERT_V(rank(l_smem) == _2{});
+-  CUTE_STATIC_ASSERT_V(rank(x_smem) == _2{});
+-  CUTE_STATIC_ASSERT_V(rank(x_gmem) == _2{});
+-
+-  CUTE_STATIC_ASSERT_V(size<0>(l_smem) == Int<kTileExtent>{});
+-  CUTE_STATIC_ASSERT_V(size<1>(l_smem) == Int<kTileExtent>{});
+-  CUTE_STATIC_ASSERT_V(size<0>(x_smem) == Int<kTileExtent>{});
+-  CUTE_STATIC_ASSERT_V(size<1>(x_smem) == Int<kTileExtent>{});
+-  CUTE_STATIC_ASSERT_V(size<0>(x_gmem) == Int<kTileExtent>{});
+-  CUTE_STATIC_ASSERT_V(size<1>(x_gmem) == Int<kTileExtent>{});
+-
+-  CUTE_STATIC_ASSERT(is_same_v<typename TensorLSmem::value_type,
+-                               typename TensorXSmem::value_type>);
+-  CUTE_STATIC_ASSERT(is_same_v<typename TensorXSmem::value_type,
+-                               typename TensorXGmem::value_type>);
++using cdls::detail::getrf::TriangularDiagonal;
+ 
+-  using T = typename TensorLSmem::value_type;
+-
+-  const unsigned col = thread_idx / kRhsLanes;
+-  const unsigned first_row = thread_idx % kRhsLanes;
+-
+-  T x_local[kRhsValues];
+-
+-  CUTE_UNROLL
+-  for (int group = 0; group < kRhsValues; ++group) {
+-    x_local[group] = x_smem(first_row + group * kRhsLanes, col);
++struct CudaSolveOps {
++  CUTE_DEVICE double divide(double value, double pivot) const {
++    return value / pivot;
+   }
+-
+-  CUTE_UNROLL
+-  for (int solve_group = 0; solve_group < kRhsValues; ++solve_group) {
+-    CUTE_UNROLL
+-    for (int solve_row = 0; solve_row < kRhsLanes; ++solve_row) {
+-      const unsigned pivot_row = solve_row + solve_group * kRhsLanes;
+-      if (first_row == solve_row) {
+-        if constexpr (diagonal_mode != TriangularDiagonal::unit) {
+-          const T diagonal = l_smem(pivot_row, pivot_row);
+-          if constexpr (diagonal_mode == TriangularDiagonal::safe_reciprocals) {
+-            x_local[solve_group] *= diagonal;
+-          } else if constexpr (diagonal_mode ==
+-                               TriangularDiagonal::mixed_reciprocals) {
+-            x_local[solve_group] = reciprocal_safe(diagonal)
+-                                       ? x_local[solve_group] * diagonal
+-                                       : x_local[solve_group] / diagonal;
+-          } else {
+-            x_local[solve_group] /= diagonal;
+-          }
+-        }
+-        x_smem(pivot_row, col) = x_local[solve_group];
+-      }
+-      __syncwarp();
+-      const T pivot = x_smem(pivot_row, col);
+-      if (first_row > solve_row) {
+-        x_local[solve_group] -=
+-            pivot * l_smem(first_row + solve_group * kRhsLanes, pivot_row);
+-      }
+-      CUTE_UNROLL
+-      for (int update_group = solve_group + 1; update_group < kRhsValues;
+-           ++update_group) {
+-        x_local[update_group] -=
+-            pivot * l_smem(first_row + update_group * kRhsLanes, pivot_row);
+-      }
+-    }
+-    if (col < bound) {
+-      x_gmem(first_row + solve_group * kRhsLanes, col) = x_local[solve_group];
+-    }
++  template <int Lanes, class Rhs>
++  CUTE_DEVICE double broadcast(double value, int source, int k, int line,
++                               Rhs& rhs) const {
++    if (threadIdx.x % Lanes == source) rhs(k, line) = value;
++    __syncwarp();
++    return rhs(k, line);
+   }
++  CUTE_DEVICE void finish_group() const {}
++  CUTE_DEVICE void finish() const {}
++};
++
++template <TriangularDiagonal Mode, class Coefficients, class Rhs, class Output>
++CUTE_DEVICE void forward_solve_tile(unsigned tid, int bound,
++                                    const Coefficients& coefficients, Rhs& rhs,
++                                    Output& output) {
++  cdls::detail::getrf::forward_solve<kTileExtent, kRhsLanes, Mode>(
++      tid, bound, coefficients, rhs, output, CudaSolveOps{});
+ }
+ 
+ // Owns preparation and consumption of this CTA's private diagonal copy.
+diff --git a/src/rocm/CMakeLists.txt b/src/rocm/CMakeLists.txt
+index 474726c..26bdb17 100644
+--- a/src/rocm/CMakeLists.txt
++++ b/src/rocm/CMakeLists.txt
+@@ -1,12 +1,36 @@
+-add_library(cdls_rocm SHARED
+-        common.cpp
+-        getrf.cpp
+-)
++# Use the same pinned CK headers as the optimized upstream GETRF. A caller can
++# supply a checkout to avoid fetching it; no sibling-project paths are required.
++set(CDLS_CK_SOURCE_DIR "" CACHE PATH "Composable Kernel source tree (ROCm 6.4.2)")
++if(NOT CDLS_CK_SOURCE_DIR)
++    include(FetchContent)
++    FetchContent_Declare(cdls_ck
++        GIT_REPOSITORY https://github.com/ROCm/composable_kernel.git
++        GIT_TAG a8c5bd9b9ad950c3e742877e01cb784da91664e3)
++    FetchContent_GetProperties(cdls_ck)
++    if(NOT cdls_ck_POPULATED)
++        FetchContent_Populate(cdls_ck)
++    endif()
++    set(CDLS_CK_SOURCE_DIR "${cdls_ck_SOURCE_DIR}")
++endif()
++if(NOT EXISTS "${CDLS_CK_SOURCE_DIR}/include/ck/config.h.in")
++    message(FATAL_ERROR "CDLS_CK_SOURCE_DIR must point to a CK source checkout")
++endif()
++foreach(arch IN LISTS CMAKE_HIP_ARCHITECTURES)
++    if(NOT arch MATCHES "^(gfx90a|gfx940|gfx941|gfx942)$")
++        message(FATAL_ERROR "FP64 CK GETRF requires wave64 gfx90a/gfx94x; got ${arch}")
++    endif()
++endforeach()
++set(CK_ENABLE_FP64 ON)
++set(CK_USE_XDL ON)
++file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated/ck")
++configure_file("${CDLS_CK_SOURCE_DIR}/include/ck/config.h.in"
++               "${CMAKE_CURRENT_BINARY_DIR}/generated/ck/config.h")
+ 
+-target_link_libraries(cdls_rocm PRIVATE
+-        "-L${HIP_CLANG_ROOT}/lib"
+-        "-Wl,-rpath=$ORIGIN/../llvm/lib"
+-        "-fno-rtlib-add-rpath"
+-        rocwmma
+-        hiprtc::hiprtc
+-)
++add_library(cdls_rocm SHARED common.cpp getrf.cpp)
++set_source_files_properties(getrf.cpp PROPERTIES LANGUAGE HIP)
++set_target_properties(cdls_rocm PROPERTIES HIP_STANDARD 17 HIP_STANDARD_REQUIRED ON)
++target_compile_features(cdls_rocm PRIVATE cxx_std_17)
++target_include_directories(cdls_rocm PRIVATE
++    "${CMAKE_CURRENT_BINARY_DIR}/generated")
++target_include_directories(cdls_rocm SYSTEM PRIVATE "${CDLS_CK_SOURCE_DIR}/include")
++target_link_libraries(cdls_rocm PRIVATE hip::host roc::rocblas)
+diff --git a/src/rocm/common.cpp b/src/rocm/common.cpp
+index 1f4de80..1a63a66 100644
+--- a/src/rocm/common.cpp
++++ b/src/rocm/common.cpp
+@@ -1,45 +1,55 @@
+ #include <cdls/common.h>
+-#include <cdls/internal/common.h>
+ #include <hip/hip_runtime_api.h>
+ 
+-#include <cstdlib>
++#include <new>
+ 
+-extern "C" cdlsStatus_t cdlsCreate(cdlsHandle_t *handle) {
+-  if (handle == nullptr) {
+-    return CDLS_STATUS_INVALID_VALUE;
+-  }
+-
+-  *handle = static_cast<cdlsHandle *>(malloc(sizeof(cdlsHandle)));
+-
+-  CDLS_CHECK_HIP_ERROR(hipStreamCreateWithFlags(
+-      reinterpret_cast<hipStream_t *>(&(*handle)->stream_work),
+-      hipStreamNonBlocking));
++#include "handle.h"
+ 
+-  CDLS_CHECK_HIP_ERROR(hipStreamCreateWithFlags(
+-      reinterpret_cast<hipStream_t *>(&(*handle)->stream_memset),
+-      hipStreamNonBlocking));
++extern "C" cdlsStatus_t cdlsCreate(cdlsHandle_t* handle) {
++  if (handle == nullptr) return CDLS_STATUS_INVALID_VALUE;
++  *handle = nullptr;
++  auto* rocm_handle = new (std::nothrow) RocmHandle{};
++  if (!rocm_handle) return CDLS_STATUS_ALLOC_FAILED;
+ 
++  hipStream_t work = nullptr, memset_stream = nullptr;
++  if (hipStreamCreateWithFlags(&work, hipStreamNonBlocking) != hipSuccess) {
++    delete rocm_handle;
++    return CDLS_STATUS_EXECUTION_FAILED;
++  }
++  if (hipStreamCreateWithFlags(&memset_stream, hipStreamNonBlocking) !=
++      hipSuccess) {
++    (void)hipStreamDestroy(work);
++    delete rocm_handle;
++    return CDLS_STATUS_EXECUTION_FAILED;
++  }
++  const auto status = rocblas_create_handle(&rocm_handle->blas);
++  if (status != rocblas_status_success) {
++    (void)hipStreamDestroy(work);
++    (void)hipStreamDestroy(memset_stream);
++    delete rocm_handle;
++    return status == rocblas_status_memory_error ? CDLS_STATUS_ALLOC_FAILED
++                                                 : CDLS_STATUS_NOT_INITIALIZED;
++  }
++  rocm_handle->common.stream_work = work;
++  rocm_handle->common.stream_memset = memset_stream;
++  *handle = &rocm_handle->common;
+   return CDLS_STATUS_SUCCESS;
+ }
+ 
+ extern "C" cdlsStatus_t cdlsDestroy(cdlsHandle_t handle) {
+-  if (handle == nullptr) {
+-    return CDLS_STATUS_INVALID_VALUE;
+-  }
+-  if (handle->stream_work == nullptr) {
+-    return CDLS_STATUS_INVALID_VALUE;
+-  }
+-  if (handle->stream_memset == nullptr) {
++  if (handle == nullptr || handle->stream_work == nullptr ||
++      handle->stream_memset == nullptr)
+     return CDLS_STATUS_INVALID_VALUE;
+-  }
+ 
+-  CDLS_CHECK_HIP_ERROR(
+-      hipStreamDestroy(static_cast<hipStream_t>(handle->stream_work)));
+-
+-  CDLS_CHECK_HIP_ERROR(
+-      hipStreamDestroy(static_cast<hipStream_t>(handle->stream_memset)));
+-
+-  free(handle);
+-
+-  return CDLS_STATUS_SUCCESS;
++  auto* rocm_handle = reinterpret_cast<RocmHandle*>(handle);
++  const auto blas_status = rocblas_destroy_handle(rocm_handle->blas);
++  const auto work_status =
++      hipStreamDestroy(static_cast<hipStream_t>(handle->stream_work));
++  const auto memset_status =
++      hipStreamDestroy(static_cast<hipStream_t>(handle->stream_memset));
++  delete rocm_handle;
++  return blas_status == rocblas_status_success && work_status == hipSuccess &&
++                 memset_status == hipSuccess
++             ? CDLS_STATUS_SUCCESS
++             : CDLS_STATUS_EXECUTION_FAILED;
+ }
+diff --git a/src/rocm/getrf.cpp b/src/rocm/getrf.cpp
+index 39a4e85..c42dfbd 100644
+--- a/src/rocm/getrf.cpp
++++ b/src/rocm/getrf.cpp
+@@ -1,991 +1,110 @@
+-/*******************************************************************************
+- *
+- * MIT License
+- *
+- * Copyright (C) 2021-2025 Advanced Micro Devices, Inc. All rights reserved.
+- *
+- * Permission is hereby granted, free of charge, to any person obtaining a copy
+- * of this software and associated documentation files (the "Software"), to deal
+- * in the Software without restriction, including without limitation the rights
+- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+- * copies of the Software, and to permit persons to whom the Software is
+- * furnished to do so, subject to the following conditions:
+- *
+- * The above copyright notice and this permission notice shall be included in
+- * all copies or substantial portions of the Software.
+- *
+- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+- * SOFTWARE.
+- *
+- *******************************************************************************/
+-#include <cdls/common.h>
+ #include <cdls/getrf.h>
+-#include <cdls/internal/common.h>
+-#include <hip/hip_ext.h>
+ 
+-#include <cute/tensor.hpp>
+-#include <rocwmma/rocwmma.hpp>
+-#include <rocwmma/rocwmma_transforms.hpp>
++#include <climits>
+ 
+-// clang-format off
+-/* Motivation
+-*
+-* For this particular GEMM kernel, high performance can be
+-* achieved through two general principles:
+-* 1) Data re-use
+-* 2) Latency hiding
+-*
+-* From the simple_gemm implementation, we know that the GEMM
+-* equation takes the form:
+-*
+-* D = alpha * AxB + beta * C, where
+-*
+-* A, B = input tiles of MxK and KxN, respectively
+-* C = input tile of MxN and
+-* D = final output tile, MxN
+-* alpha, beta are scalar factors
+-* (M, N and K are block dimensions)
+-*
+-* In the simple_gemm sample, each warp is responsible for computing
+-* one output D tile of the final result. In the current sample, each
+-* warp is now responsible for computing multiple D tiles, what we
+-* might call a Warp Tile. Because Warp Tile blocks share data locality
+-* in either the same row or column direction, warps can re-use input
+-* data from A and B as they step through the K dimension for each block.
+-*
+-* Moreover, Warp Tiles processed by warps in a thread block
+-* have common locality in the larger Macro Tile. In the Global D layout
+-* shown below, data re-use opportunities await in D tiles aligned in the
+-* same rows / columns. These will pass over the same input A/B values as
+-* they march through the K dimension.
+-*
+-* Block size:      (BlockM x BlockN)
+-* Warp tile size:  (BlocksM * BlockSize.x) x (BlocksN * BlockSize.y)
+-* Macro Tile size: (TBlock.x / WarpSize * WarpTileSize.x) x (TBlock.y * WarpTileSize.y)
+-*
+-* Wave data share input A: same row
+-* Wave data share input B: same col
+-*
+-* Global D layout & warp assignment for BlocksM = BlocksN = 2, 2x2 Warps
+-*
+-* W (X, Y) = wave row X, col Y
+-*                                     |--------- Macro Tile N-------------|
+-*                                     |-- Wave Tile N --|
+-*                                     |-BlockN-|
+-*
+-*                                      BlockN x BlocksN   BlockN x BlocksN
+-*                                     |<--------------->|<--------------->|
+-*      _ _   _ _      _ _          ___  ________ ________ ________ ________
+-*       |     |        |            ^  |        |        |        |        |
+-*       | Wave| BlockM |   BlockM   |  |        W        |        W        |
+-*       | Tile|       _|_     x     |  |__   (0, 0)    __|__   (0, 1)    __|
+-*       |  M  |            BlocksM  |  |                 |                 |
+-* Macro |     |                     |  |                 |                 |
+-*  Tile |    _|_                   _v_ |________|________|________|________|
+-*   M   |                           ^  |        |        |        |        |
+-*       |                  BlockM   |  |        W        |        W        |
+-*       |                     x     |  |__   (1, 0)    __|__   (1, 1)    __|
+-*       |                  BlocksM  |  |                 |                 |
+-*       |                           |  |                 |                 |
+-*      _|_                         _v_ |________|________|________|________|
+-*
+-*
+-* From the above diagram, we can see that input A/B data can be shared within warps,
+-* as well as between warps in the same threadblock. This means that warps in the same
+-* thread block can share the input loading responsibilities if they synchronize stepping
+-* through the K dimension for tiles at the same time.
+-*
+-* rocWMMA Cooperative API allows thread blocks to collaboratively move data from
+-* one location to another. In this case, we will move data from global memory space to
+-* local storage such that inter-warp data sharing is possible. Maximizing data re-use
+-* in this way reduces costly access to global memory and improves performance.
+-*
+-* To maximize efficiency, we can structure the kernel to maximize bandwidth usage and keep
+-* the compute resources as busy as possible at the same time. Using a pre-fetch technique,
+-* we can fetch A/B inputs for the next K-step while keeping the compute resources busy
+-* processing the current K-step. This helps to hide memory fetching latency.
+-*
+-* In general, the process would flow like the following:
+-*
+-*       Start
+-*         |
+-*   Pre-Fetch Global A/B for K0
+-*         |
+-*   Store LDS buffer0
+-*         |
+-*         v
+-*   Loop: i = 1:K-1
+-*   ^         |
+-*   |    Fetch Global A/B i+1; store LDS Buffer 1
+-*   |         |
+-*   |    Load LDS buffer0; Accum A x B
+-*   |         |
+-*   |    Swap buffer0, buffer1
+-*   |         |
+-*   |         |
+-*   end_loop <-
+-*         |
+-*   Load LDS buffer0; Accum A x B
+-*         |
+-*   Load Global C Tile
+-*         |
+-*   D = alpha * AccumAB + beta * C
+-*         |
+-*   Write D Tile
+-*         |
+-*         v
+-*        End
+-*
+-* Lds Mapping
+-* Buffer Width = LDS Width = BlockK
+-* Matrix geometry for inputs A and B have a common dimension (BlockK).
+-* We can fix one of the LDS dimensions to BlockK (in this case the width),
+-* and insert blocks of different heights (BlockM, BlockN) to use the space
+-* without the need of extra padding.
+-*
+-* Fragments of B must be transposed to fit this geometry,
+-* and both fragments from A and B must accomodate LDS data layout.
+-*
+-* Local Layout (LDS):
+-*
+-* Non - transposed A fragments [A0 ... AX-1] are placed first and occupy a total height
+-* of Macro Tile X, where X = number of A blocks and Ck is the kth column of the A block.
+-*
+-* Transposed B fragments [B0 (T) ... BY-1 (T)] follow A fragments and occupy a total height of
+-* Macro Tile Y, where Y = number of B blocks, and Rk is the kth row of the B block.
+-*
+-*
+-*                        _____________BlockK_____________
+-*                       |                                |
+-*                       v                                v
+-*                  (0,0) ----------------------------------->
+-*          -->       -->  ______________    ...        ______
+-*          |         |   |    |    |                  |      |
+-*          |         |   |    |    |                  |      |
+-*  Macro   |  BlockM |   | C0 | C1 | C2               | Ck-1 |   A0
+-*  Tile M  |         |   |    |    |                  |      |
+-*          |         --> |___ |___ |____    ...       |______|
+-*          |         .
+-*          |         .          ...  ...  ...  ...          AX-1
+-*          -->
+-*          -->       -->  ______________    ...        ______
+-*          |         |   |    |    |                  |      |
+-*          |         |   |    |    |                  |      |
+-*  Macro   |  BlockN |   | R0 | R1 | R2               | Rk-1 |   B0 (T)
+-*  Tile N  |         |   |    |    |                  |      |
+-*          |         --> |___ |___ |____    ...       |______|
+-*          |         .
+-*          |         .          ...  ...  ...  ...        BY-1 (T)
+-*          -->                                           (MacroTileM + MacroTileN - 1, BlockK -1)
+-*
+-* Depending on the locality of the block being processed, warps load the corresponding
+-* A and B inputs from LDS buffer and use them for the accumulation of AxB calculations.
+-*/
+-// clang-format on
++#include "../common/getrf/hybrid.h"
++#include "getrf/tiled.h"
++#include "handle.h"
+ 
+-using namespace rocwmma;
++using namespace cdls::rocm_detail::getrf;
+ 
+-// Types
+-using InputT = float64_t;
+-using OutputT = float64_t;
+-using ComputeT = float64_t;
+-
+-using DataLayoutA = col_major;
+-using DataLayoutB = col_major;
+-using DataLayoutC = col_major;
+-using DataLayoutLds = col_major;
+-
+-// Block sizes
+-constexpr uint32_t ROCWMMA_M = 16u;
+-constexpr uint32_t ROCWMMA_N = 16u;
+-constexpr uint32_t ROCWMMA_K = 16u;
+-
+-// Warp size
+-constexpr uint32_t WARP_SIZE = Constants::AMDGCN_WAVE_SIZE;
+-
+-// Warp tile: computed by each warp
+-constexpr uint32_t BLOCKS_M = 2u;
+-constexpr uint32_t BLOCKS_N = 2u;
+-constexpr uint32_t WARP_TILE_M = BLOCKS_M * ROCWMMA_M;
+-constexpr uint32_t WARP_TILE_N = BLOCKS_N * ROCWMMA_N;
+-constexpr uint32_t WARP_TILE_K = ROCWMMA_K;
+-
+-// Macro Tile: computed by each thread block (workgroup)
+-// Note: TBLOCK_X must be multiple of WARP_SIZE.
+-constexpr uint32_t TBLOCK_X = 128u;
+-constexpr uint32_t TBLOCK_Y = 2u;
+-constexpr uint32_t WARPS_M = TBLOCK_X / WARP_SIZE;
+-constexpr uint32_t WARPS_N = TBLOCK_Y;
+-constexpr uint32_t WARP_COUNT = WARPS_M * WARPS_N;
+-constexpr uint32_t MACRO_TILE_M = WARPS_M * WARP_TILE_M;
+-constexpr uint32_t MACRO_TILE_N = WARPS_N * WARP_TILE_N;
+-constexpr uint32_t MACRO_TILE_K = ROCWMMA_K;
+-
+-// Mfma frags (warp tile)
+-using MmaFragA = fragment<matrix_a, WARP_TILE_M, WARP_TILE_N, WARP_TILE_K,
+-                          InputT, DataLayoutA>;
+-using MmaFragB = fragment<matrix_b, WARP_TILE_M, WARP_TILE_N, WARP_TILE_K,
+-                          InputT, DataLayoutB>;
+-using MmaFragC = fragment<accumulator, WARP_TILE_M, WARP_TILE_N, WARP_TILE_K,
+-                          OutputT, DataLayoutC>;
+-using MmaFragAcc =
+-    fragment<accumulator, WARP_TILE_M, WARP_TILE_N, WARP_TILE_K, ComputeT>;
+-
+-// Global read (macro tile)
+-using CoopScheduler = fragment_scheduler::coop_col_major_2d<TBLOCK_X, TBLOCK_Y>;
+-using GRFragA = fragment<matrix_a, MACRO_TILE_M, MACRO_TILE_N, MACRO_TILE_K,
+-                         InputT, DataLayoutA, CoopScheduler>;
+-using GRFragB = fragment<matrix_b, MACRO_TILE_M, MACRO_TILE_N, MACRO_TILE_K,
+-                         InputT, DataLayoutB, CoopScheduler>;
+-
+-// Local write of global buffers (macro tile)
+-// - Must match Lds data layout.
+-// - Lds has transposed B frags.
+-using LWFragA = apply_data_layout_t<GRFragA, DataLayoutLds>;
+-using LWFragB = apply_data_layout_t<apply_transpose_t<GRFragB>, DataLayoutLds>;
+-
+-// Transform helpers
+-constexpr auto transformGRFragAToLWFragA = [](GRFragA const& grFragA) {
+-  return apply_data_layout<DataLayoutLds>(grFragA);
+-};
+-
+-constexpr auto transformGRFragBToLWFragB = [](GRFragB const& grFragB) {
+-  return apply_data_layout<DataLayoutLds>(grFragB);
+-};
+-
+-// Local read (mfma frags)
+-// - Must match Lds data layout.
+-// - Lds has transposed B frags.
+-using LRFragA = apply_data_layout_t<MmaFragA, DataLayoutLds>;
+-using LRFragB = apply_data_layout_t<apply_transpose_t<MmaFragB>, DataLayoutLds>;
+-
+-// Transform helpers
+-constexpr auto transformLRFragAToMmaFragA = [](LRFragA const& lrFragA) {
+-  return apply_data_layout<DataLayoutA>(lrFragA);
+-};
+-
+-constexpr auto transformLRFragBToMmaFragB = [](LRFragB const& lrFragB) {
+-  return apply_data_layout<DataLayoutB>(lrFragB);
+-};
+-
+-template <typename IndexType>
+-ROCWMMA_HOST_DEVICE static auto index_to_coord(const IndexType index,
+-                                               const IndexType M) {
+-  IndexType left = 0, right = M - 1;
+-  IndexType k = 0;
+-  while (left <= right) {
+-    const IndexType mid = left + (right - left) / 2;
+-    const IndexType curr = mid * (2 * M - mid);
+-    const IndexType next = (mid + 1) * (2 * M - (mid + 1));
+-
+-    if (curr <= index && index < next) {
+-      k = mid;
+-      break;
+-    }
+-    if (curr > index) {
+-      right = mid - 1;
+-    } else {
+-      left = mid + 1;
+-    }
+-  }
+-
+-  const IndexType base = k * (2 * M - k);
+-
+-  const IndexType offset = index - base;
+-  IndexType i_prime, j_prime;
+-
+-  if (offset == 0) {
+-    i_prime = 0;
+-    j_prime = 0;
+-  } else if (offset % 2 == 1) {
+-    const IndexType t = (offset + 1) / 2;
+-    i_prime = t;
+-    j_prime = 0;
+-  } else {
+-    const IndexType t = offset / 2;
+-    i_prime = 0;
+-    j_prime = t;
+-  }
+-
+-  return std::make_tuple(k + i_prime, k + j_prime);
++namespace {
++bool supported_square(long m, long n) {
++  return m == n && m > 0 && m <= INT_MAX &&
++         workspace_size(static_cast<int>(m)) != 0;
+ }
+ 
+-template <bool enable_static_pivoting, class TensorSmem, class TensorGmem>
+-ROCWMMA_DEVICE void lu_64x64_naive_256_threads(
+-    const unsigned thread_idx, const int bound_m, const int bound_n,
+-    TensorSmem& smem, TensorGmem& gmem, int* const pivot_count_ptr,
+-    const typename TensorSmem::value_type criterion) {
+-  using namespace cute;
+-
+-  CUTE_STATIC_ASSERT_V(rank(smem) == _2{});
+-  CUTE_STATIC_ASSERT_V(rank(smem) == _2{});
+-
+-  CUTE_STATIC_ASSERT_V(size<0>(smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<1>(smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<0>(gmem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<1>(gmem) == _64{});
+-
+-  CUTE_STATIC_ASSERT(is_same_v<typename TensorSmem::value_type,
+-                               typename TensorGmem::value_type>);
+-
+-  using T = typename TensorSmem::value_type;
+-
+-  const auto thread_row = thread_idx % 16;
+-  const auto thread_col = thread_idx / 16;
+-
+-  CUTE_UNROLL
+-  for (unsigned diag_idx = 0; diag_idx < 64; ++diag_idx) {
+-    const auto block_size = 4 - diag_idx / 16;
+-    // block size is up to 4
+-    T l[4], u[4];
+-    bool pred_row[4] = {false, false, false, false};
+-    bool pred_col[4] = {false, false, false, false};
+-
+-    if (1 + diag_idx + thread_idx < 64) {
+-      smem(1 + diag_idx + thread_idx, diag_idx) /= smem(diag_idx, diag_idx);
+-    }
+-    synchronize_workgroup();
+-
+-    CUTE_UNROLL
+-    for (unsigned i = 0; i < block_size; ++i) {
+-      if (1 + diag_idx + i * 16 + thread_row < 64) {
+-        l[i] = smem(1 + diag_idx + i * 16 + thread_row, diag_idx);
+-        pred_row[i] = true;
+-      }
+-      if (1 + diag_idx + i * 16 + thread_col < 64) {
+-        u[i] = smem(diag_idx, 1 + diag_idx + i * 16 + thread_col);
+-        pred_col[i] = true;
+-      }
+-    }
+-
+-    CUTE_UNROLL
+-    for (unsigned row = 0; row < block_size; ++row) {
+-      CUTE_UNROLL
+-      for (unsigned col = 0; col < block_size; ++col) {
+-        if (pred_row[row] && pred_col[col]) {
+-          auto value = smem(1 + diag_idx + row * 16 + thread_row,
+-                            1 + diag_idx + col * 16 + thread_col);
+-          value -= l[row] * u[col];
+-          if constexpr (enable_static_pivoting) {
+-            if (thread_idx == 0 && row == 0 && col == 0) {
+-              if (std::abs(value) < criterion) {
+-                if (value < 0) {
+-                  value = -criterion;
+-                } else {
+-                  value = criterion;
+-                }
+-                __atomic_fetch_add(pivot_count_ptr, 1, __ATOMIC_RELAXED);
+-              }
+-            }
+-          }
+-          smem(1 + diag_idx + row * 16 + thread_row,
+-               1 + diag_idx + col * 16 + thread_col) = value;
+-        }
+-      }
+-    }
+-
+-    synchronize_workgroup();
+-  }
++// CK's zero-pivot report has its own workspace slot. The public pivot_count
++// retains its existing meaning as a static-pivot replacement counter.
++std::size_t buffer_bytes(int n) { return workspace_size(n) + sizeof(int); }
++int* internal_info(void* workspace, int n) {
++  return reinterpret_cast<int*>(static_cast<char*>(workspace) +
++                                workspace_size(n));
+ }
+ 
+-template <class TensorUSmem, class TensorXSmem, class TensorXGmem>
+-ROCWMMA_DEVICE void xu_solve_64x64_256_threads(const unsigned thread_idx,
+-                                               const int bound,
+-                                               const TensorUSmem& u_smem,
+-                                               const TensorXSmem& x_smem,
+-                                               TensorXGmem& x_gmem) {
+-  using namespace cute;
+-
+-  CUTE_STATIC_ASSERT_V(rank(u_smem) == _2{});
+-  CUTE_STATIC_ASSERT_V(rank(x_smem) == _2{});
+-  CUTE_STATIC_ASSERT_V(rank(x_gmem) == _2{});
+-
+-  CUTE_STATIC_ASSERT_V(size<0>(u_smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<1>(u_smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<0>(x_smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<1>(x_smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<0>(x_gmem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<1>(x_gmem) == _64{});
+-
+-  CUTE_STATIC_ASSERT(is_same_v<typename TensorUSmem::value_type,
+-                               typename TensorXSmem::value_type>);
+-  CUTE_STATIC_ASSERT(is_same_v<typename TensorXSmem::value_type,
+-                               typename TensorXGmem::value_type>);
+-
+-  using T = typename TensorUSmem::value_type;
+-
+-  static constexpr unsigned threads = 256;
+-
+-  CUTE_STATIC_ASSERT(threads % 64 == 0);
+-  CUTE_STATIC_ASSERT(threads > 128);
+-  CUTE_STATIC_ASSERT(threads <= 1024);
+-
+-  constexpr static unsigned threads_in_one_row = threads / 64;
+-  constexpr static unsigned threads_iterates = 64 / threads_in_one_row;
+-
+-  CUTE_STATIC_ASSERT(64 % threads_in_one_row == 0);
+-
+-  const unsigned row = thread_idx / threads_in_one_row;
+-  const unsigned first_col = thread_idx % threads_in_one_row;
+-
+-  T x_local[threads_iterates];
+-
+-  CUTE_UNROLL
+-  for (int group = 0; group < threads_iterates; ++group) {
+-    x_local[group] = x_smem(row, first_col + group * threads_in_one_row);
+-  }
+-
+-  CUTE_UNROLL
+-  for (int solve_group = 0; solve_group < threads_iterates; ++solve_group) {
+-    CUTE_UNROLL
+-    for (int solve_col = 0; solve_col < threads_in_one_row; ++solve_col) {
+-      if (first_col == solve_col) {
+-        x_local[solve_group] /=
+-            u_smem(solve_col + solve_group * threads_in_one_row,
+-                   solve_col + solve_group * threads_in_one_row);
+-        x_smem(row, solve_col + solve_group * threads_in_one_row) =
+-            x_local[solve_group];
+-      }
+-      synchronize_workgroup();
+-      const T pivot = x_smem(row, solve_col + solve_group * threads_in_one_row);
+-      if (first_col > solve_col) {
+-        x_local[solve_group] -=
+-            pivot * u_smem(solve_col + solve_group * threads_in_one_row,
+-                           first_col + solve_group * threads_in_one_row);
+-      }
+-      CUTE_UNROLL
+-      for (int update_group = solve_group + 1; update_group < threads_iterates;
+-           ++update_group) {
+-        x_local[update_group] -=
+-            pivot * u_smem(solve_col + solve_group * threads_in_one_row,
+-                           first_col + update_group * threads_in_one_row);
+-      }
+-    }
+-    if (row < bound) {
+-      x_gmem(row, first_col + solve_group * threads_in_one_row) =
+-          x_local[solve_group];
+-    }
+-  }
++bool valid_factorization(cdlsHandle_t handle, long m, long n,
++                         const double* matrix, long lda,
++                         const void* workspace) {
++  return supported_square(m, n) && handle && matrix && workspace && lda >= m &&
++         reinterpret_cast<std::uintptr_t>(workspace) % alignof(int) == 0;
+ }
+ 
+-template <class TensorLSmem, class TensorXSmem, class TensorXGmem>
+-ROCWMMA_DEVICE static void lx_solve_64x64_256_threads(const unsigned thread_idx,
+-                                                      const int bound,
+-                                                      const TensorLSmem& l_smem,
+-                                                      const TensorXSmem& x_smem,
+-                                                      TensorXGmem& x_gmem) {
+-  using namespace cute;
+-
+-  CUTE_STATIC_ASSERT_V(rank(l_smem) == _2{});
+-  CUTE_STATIC_ASSERT_V(rank(x_smem) == _2{});
+-  CUTE_STATIC_ASSERT_V(rank(x_gmem) == _2{});
+-
+-  CUTE_STATIC_ASSERT_V(size<0>(l_smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<1>(l_smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<0>(x_smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<1>(x_smem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<0>(x_gmem) == _64{});
+-  CUTE_STATIC_ASSERT_V(size<1>(x_gmem) == _64{});
+-
+-  CUTE_STATIC_ASSERT(is_same_v<typename TensorLSmem::value_type,
+-                               typename TensorXSmem::value_type>);
+-  CUTE_STATIC_ASSERT(is_same_v<typename TensorXSmem::value_type,
+-                               typename TensorXGmem::value_type>);
+-
+-  static constexpr unsigned threads = 256;
+-
+-  CUTE_STATIC_ASSERT(threads % 64 == 0);
+-  CUTE_STATIC_ASSERT(threads > 128);
+-  CUTE_STATIC_ASSERT(threads <= 1024);
+-
+-  constexpr static unsigned threads_in_one_col = threads / 64;
+-  constexpr static unsigned threads_iterates = 64 / threads_in_one_col;
+-
+-  CUTE_STATIC_ASSERT(64 % threads_in_one_col == 0);
+-
+-  using T = typename TensorLSmem::value_type;
+-
+-  const unsigned col = thread_idx / threads_in_one_col;
+-  const unsigned first_row = thread_idx % threads_in_one_col;
+-
+-  T x_local[threads_iterates];
+-
+-  CUTE_UNROLL
+-  for (int group = 0; group < threads_iterates; ++group) {
+-    x_local[group] = x_smem(first_row + group * threads_in_one_col, col);
+-  }
+-
+-  CUTE_UNROLL
+-  for (int solve_group = 0; solve_group < threads_iterates; ++solve_group) {
+-    CUTE_UNROLL
+-    for (int solve_row = 0; solve_row < threads_in_one_col; ++solve_row) {
+-      if (first_row == solve_row) {
+-        x_smem(solve_row + solve_group * threads_in_one_col, col) =
+-            x_local[solve_group];
+-      }
+-      synchronize_workgroup();
+-      const T pivot = x_smem(solve_row + solve_group * threads_in_one_col, col);
+-      if (first_row > solve_row) {
+-        x_local[solve_group] -=
+-            pivot * l_smem(first_row + solve_group * threads_in_one_col,
+-                           solve_row + solve_group * threads_in_one_col);
+-      }
+-      CUTE_UNROLL
+-      for (int update_group = solve_group + 1; update_group < threads_iterates;
+-           ++update_group) {
+-        x_local[update_group] -=
+-            pivot * l_smem(first_row + update_group * threads_in_one_col,
+-                           solve_row + solve_group * threads_in_one_col);
+-      }
+-    }
+-    if (col < bound) {
+-      x_gmem(first_row + solve_group * threads_in_one_col, col) =
+-          x_local[solve_group];
+-    }
+-  }
++cdlsStatus_t factorize_no_pivot(cdlsHandle_t handle, int n, double* matrix,
++                                long lda, void* workspace) {
++  const auto stream = static_cast<hipStream_t>(handle->stream_work);
++  int* info = internal_info(workspace, n);
++  if (n <= tile_size)
++    return launch_small<true>(n, matrix, lda, info, stream, 0) == hipSuccess
++               ? CDLS_STATUS_SUCCESS
++               : CDLS_STATUS_EXECUTION_FAILED;
++  if (hipMemsetAsync(info, 0, sizeof(int), stream) != hipSuccess)
++    return CDLS_STATUS_EXECUTION_FAILED;
++  // CK production policy: 512-wide outer panels, fused tail <= 4096.
++  if (n <= 4096 || lda > INT_MAX)
++    return launch_prefix(n, n, matrix, lda, info, workspace, stream, 0) ==
++                   hipSuccess
++               ? CDLS_STATUS_SUCCESS
++               : CDLS_STATUS_EXECUTION_FAILED;
++  auto blas = reinterpret_cast<RocmHandle*>(handle)->blas;
++  if (rocblas_set_stream(blas, stream) != rocblas_status_success)
++    return CDLS_STATUS_EXECUTION_FAILED;
++  const double minus = -1.0, plus = 1.0;
++  return cdls::detail::getrf::factorize_hybrid(
++      static_cast<long>(n), matrix, lda, 4096, tile_size,
++      [](long remaining) { return std::min<long>(512, remaining); },
++      [&](long remaining, double* base, int panels) {
++        const auto offset = (base - matrix) / (static_cast<long>(lda) + 1);
++        return launch_prefix(remaining, panels ? panels * tile_size : remaining,
++                             base, lda, info, workspace, stream,
++                             static_cast<int>(offset)) == hipSuccess
++                   ? CDLS_STATUS_SUCCESS
++                   : CDLS_STATUS_EXECUTION_FAILED;
++      },
++      [&](double* base, int trailing, int width) {
++        return rocblas_dgemm(
++                   blas, rocblas_operation_none, rocblas_operation_none,
++                   trailing, trailing, width, &minus, base + width, lda,
++                   base + static_cast<std::size_t>(width) * lda, lda, &plus,
++                   base + width + static_cast<std::size_t>(width) * lda,
++                   lda) == rocblas_status_success
++                   ? CDLS_STATUS_SUCCESS
++                   : CDLS_STATUS_EXECUTION_FAILED;
++      });
+ }
++}  // namespace
+ 
+-template <bool enable_static_pivoting, class ShapeType, class InputT,
+-          class TileShape, class SmemLayoutC, class Smem>
+-ROCWMMA_KERNEL void __launch_bounds__(256)
+-    getrf_static_pivot_kernel(ShapeType shape_M, ShapeType shape_N, InputT* a,
+-                              ShapeType ldA, int* const task_idx_ptr,
+-                              bool* const task_table_ptr,
+-                              int* const pivot_count_ptr,
+-                              const InputT criterion) {
+-  using namespace cute;
+-
+-  auto thread_idx = threadIdx.x + threadIdx.y * TBLOCK_X;
+-
+-  const auto task_idx = [&] {
+-    extern __shared__ int task_idx[];
+-    if (thread_idx == 0) {
+-      *task_idx = atomicAdd(task_idx_ptr, 1);
+-    }
+-    synchronize_workgroup();
+-    return *task_idx;
+-  }();
+-
+-  constexpr static auto BLK_M = size<0>(TileShape{});
+-  constexpr static auto BLK_N = size<1>(TileShape{});
+-  constexpr static auto BLK_K = size<2>(TileShape{});
+-  static_assert(BLK_M == BLK_N);
+-
+-  constexpr static auto TILE_NUM_IN_BLOCK = BLK_M / BLK_K;
+-  static_assert(BLK_M % BLK_K == 0);
+-  static_assert(BLK_M >= BLK_K);
+-
+-  const int BLOCK_NUM = ceil_div(shape_M, BLK_M);
+-
+-  const auto blockIdx_ = index_to_coord(task_idx, BLOCK_NUM);
+-  const auto blockIdx_x = get<0>(blockIdx_);
+-  const auto blockIdx_y = get<1>(blockIdx_);
+-
+-  Tensor task_table = make_tensor(make_gmem_ptr(task_table_ptr),
+-                                  make_shape(BLOCK_NUM, BLOCK_NUM));
+-
+-  const auto dA = make_stride(_1{}, ldA);  // (dM, dK)
+-  const auto dB = make_stride(ldA, _1{});  // (dN, dK)
+-  const auto dC = make_stride(_1{}, ldA);  // (dM, dN)
+-
+-  const auto shape_MNK =
+-      make_shape(shape_M, shape_M, BLK_M * min(blockIdx_x, blockIdx_y));
+-
+-  const auto k = get<2>(shape_MNK);
+-
+-  // Compute tile residues for predication
+-  const int LEGAL_BLK_M = min(BLK_M, shape_M - BLK_M * blockIdx_x);
+-  const int LEGAL_BLK_N = min(BLK_N, shape_M - BLK_M * blockIdx_y);
+-
+-  // Preconditions
+-  CUTE_STATIC_ASSERT_V(rank(shape_MNK) == Int<3>{});    // (M, N, K)
+-  CUTE_STATIC_ASSERT_V(rank(TileShape{}) == Int<3>{});  // (BLK_M, BLK_N, BLK_K)
+-
+-  // Tile Sizes
+-  constexpr auto warpTileSize = make_coord2d(WARP_TILE_M, WARP_TILE_N);
+-  constexpr auto macroTileSize = make_coord2d(BLK_M, BLK_N);
+-
+-  // Local warp coordinate relative to current threadblock (wg).
+-  auto localWarpCoord = make_coord2d(threadIdx.x / WARP_SIZE, threadIdx.y);
+-  auto localWarpOffset = localWarpCoord * warpTileSize;
+-
+-  // Global matrix coordinates for C/D
+-  auto macroTileCoord = make_coord2d(blockIdx_x, blockIdx_y) * macroTileSize;
+-  auto warpTileCoord = macroTileCoord + localWarpOffset;
+-
+-  // Bounds check
+-  auto warpTileBound = warpTileCoord + warpTileSize;
+-
+-  const bool enabled = [&] {
+-    if (get<0>(warpTileBound) > shape_M || get<1>(warpTileBound) > shape_N) {
+-      return false;
+-    }
+-    return true;
+-  }();
+-
+-  // 1D global read coordinate setup
+-  using GRFragAMap1d = GetDataLayout_t<GRFragA>;
+-  using GRFragBMap1d = GetDataLayout_t<GRFragB>;
+-
+-  // Initial globa read address offsets
+-  auto globalReadOffsetA = GRFragAMap1d::fromMatrixCoord(
+-      make_coord2d(get<0>(macroTileCoord), 0u), ldA);
+-  auto globalReadOffsetB = GRFragBMap1d::fromMatrixCoord(
+-      make_coord2d(0u, get<1>(macroTileCoord)), ldA);
+-
+-  // Incremental global read address offsets
+-  auto kStepOffsetA =
+-      GRFragAMap1d::fromMatrixCoord(make_coord2d(0u, BLK_K), ldA);
+-  auto kStepOffsetB =
+-      GRFragBMap1d::fromMatrixCoord(make_coord2d(BLK_K, 0u), ldA);
+-
+-  // Perform initial global pre-fetch
+-  GRFragA grFragA;
+-  GRFragB grFragB;
+-
+-  const auto wait_for_flag = [&](const auto m, const auto n) {
+-    if (thread_idx == 0) {
+-      while (true != __atomic_load_n(&task_table(m, n), __ATOMIC_ACQUIRE)) {
+-      }
+-    }
+-    synchronize_workgroup();
+-  };
+-
+-  if (enabled && blockIdx_x != 0 && blockIdx_y != 0) {
+-    wait_for_flag(blockIdx_x, 0);
+-    wait_for_flag(0, blockIdx_y);
+-
+-    load_matrix_sync(grFragA, a + globalReadOffsetA, ldA);
+-    load_matrix_sync(grFragB, a + globalReadOffsetB, ldA);
+-  }
+-
+-  globalReadOffsetA += kStepOffsetA;
+-  globalReadOffsetB += kStepOffsetB;
+-
+-  // Setup LDS addressing
+-  // This kernel will use 2 separate LDS blocks for pipelining
+-  // the input prefetching during the accumulation loop
+-  Smem* smem = reinterpret_cast<Smem*>([] {
+-    extern __shared__ char var[];
+-    return var;
+-  }());
+-  using LWFragAShape = GetIOShape_t<LWFragA>;
+-  using LWFragBShape = GetIOShape_t<LWFragB>;
+-  using LWFragAMap1d = GetDataLayout_t<LWFragA>;
+-  using LWFragBMap1d = GetDataLayout_t<LWFragB>;
+-
+-  constexpr uint32_t ldsWidth = BLK_K;
+-  constexpr uint32_t ldsHeight =
+-      LWFragAShape::BlockHeight + LWFragBShape::BlockHeight;
+-  constexpr uint32_t sizeLds = ldsHeight * ldsWidth;
+-  constexpr uint32_t ldsld =
+-      std::is_same_v<DataLayoutLds, row_major> ? ldsWidth : ldsHeight;
+-
+-  auto* ldsPtrLo = reinterpret_cast<InputT*>(smem);
+-  auto* ldsPtrHi = ldsPtrLo + sizeLds;
+-
+-  // Local write offsets to start of A / B data
+-  auto ldsWriteOffsetA = 0u;
+-  auto ldsWriteOffsetB = LWFragAMap1d::fromMatrixCoord(
+-      make_coord2d(LWFragAShape::BlockHeight, 0u), ldsld);
+-
+-  // Local read offsets for mfma frags
+-  auto ldsReadOffsetA =
+-      ldsWriteOffsetA + LWFragAMap1d::fromMatrixCoord(
+-                            make_coord2d(get<0>(localWarpOffset), 0u), ldsld);
+-  auto ldsReadOffsetB =
+-      ldsWriteOffsetB + LWFragBMap1d::fromMatrixCoord(
+-                            make_coord2d(get<1>(localWarpOffset), 0u), ldsld);
+-
+-  /// Initialize accumulation frags
+-  MmaFragAcc mmaFragAcc;
+-  fill_fragment(mmaFragAcc, 0.0);
+-
+-  if (enabled && blockIdx_x != 0 && blockIdx_y != 0) {
+-    // Write prefetch to local
+-    store_matrix_sync(ldsPtrLo + ldsWriteOffsetA,
+-                      transformGRFragAToLWFragA(grFragA), ldsld);
+-    store_matrix_sync(ldsPtrLo + ldsWriteOffsetB,
+-                      transformGRFragBToLWFragB(grFragB), ldsld);
+-
+-    // Synchronize warps and memory
+-    synchronize_workgroup();
+-
+-    // Accumulate A * B for all mfma frags in warp tile
+-    for (uint32_t currentK = BLK_K; currentK < k; currentK += BLK_K) {
+-      // Local read mfma frags from first LDS buffer
+-      LRFragA lrFragA;
+-      LRFragB lrFragB;
+-      load_matrix_sync(lrFragA, ldsPtrLo + ldsReadOffsetA, ldsld);
+-      load_matrix_sync(lrFragB, ldsPtrLo + ldsReadOffsetB, ldsld);
+-
+-      if (currentK % BLK_M == 0) {
+-        wait_for_flag(blockIdx_x, currentK / BLK_M);
+-        wait_for_flag(currentK / BLK_M, blockIdx_y);
+-      }
+-
+-      // Prefetch next round of global frags
+-      load_matrix_sync(grFragA, a + globalReadOffsetA, ldA);
+-      load_matrix_sync(grFragB, a + globalReadOffsetB, ldA);
+-
+-      // Advance offsets to next k step
+-      globalReadOffsetA += kStepOffsetA;
+-      globalReadOffsetB += kStepOffsetB;
+-
+-      // Matrix mult-accum(A * B)
+-      mma_sync(mmaFragAcc, transformLRFragAToMmaFragA(lrFragA),
+-               transformLRFragBToMmaFragB(lrFragB), mmaFragAcc);
+-
+-      // Write prefetch to second LDS buffer
+-      store_matrix_sync(ldsPtrHi + ldsWriteOffsetA,
+-                        transformGRFragAToLWFragA(grFragA), ldsld);
+-      store_matrix_sync(ldsPtrHi + ldsWriteOffsetB,
+-                        transformGRFragBToLWFragB(grFragB), ldsld);
+-
+-      // Make sure that all waves have finished reading / writing to lds for
+-      // currentK.
+-      synchronize_workgroup();
+-
+-      // Swap Lds buffers
+-      auto* tmp = ldsPtrLo;
+-      ldsPtrLo = ldsPtrHi;
+-      ldsPtrHi = tmp;
+-    }
+-  }
+-
+-  // Start loading C
+-  using MmaFragCMap1d = GetDataLayout_t<MmaFragC>;
+-
+-  MmaFragC mmaFragC;
+-  if (enabled) {
+-    load_matrix_sync(
+-        mmaFragC, a + MmaFragCMap1d::fromMatrixCoord(warpTileCoord, ldA), ldA);
+-  }
+-
+-  if (enabled && blockIdx_x != 0 && blockIdx_y != 0) {
+-    // Clean up tail A * B
+-    LRFragA lrFragA;
+-    LRFragB lrFragB;
+-    load_matrix_sync(lrFragA, ldsPtrLo + ldsReadOffsetA, ldsld);
+-    load_matrix_sync(lrFragB, ldsPtrLo + ldsReadOffsetB, ldsld);
+-    mma_sync(mmaFragAcc, transformLRFragAToMmaFragA(lrFragA),
+-             transformLRFragBToMmaFragB(lrFragB), mmaFragAcc);
+-  }
+-
+-  constexpr uint32_t chunkSize = 8u;
+-  constexpr uint32_t chunks = mmaFragC.num_elements / chunkSize;
+-  constexpr uint32_t remain = mmaFragC.num_elements % chunkSize;
+-
+-  auto uniform_fma_unroll_chunk = [&](uint32_t start_idx, uint32_t size) {
+-    for (int i = start_idx; i < start_idx + size; i++) {
+-      mmaFragC.x[i] -= mmaFragAcc.x[i];
+-    }
+-  };
+-
+-  for (uint32_t c = 0u; c < chunks; c++) {
+-    uniform_fma_unroll_chunk(c * chunkSize, chunkSize);
+-  }
+-  uniform_fma_unroll_chunk(chunks * chunkSize, remain);
+-
+-  // copy to smem
+-
+-  if (enabled) {
+-    store_matrix_sync(smem->factorize.smem_c.data() +
+-                          MmaFragCMap1d::fromMatrixCoord(warpTileCoord, BLK_M),
+-                      mmaFragC, BLK_M);
+-  }
+-
+-  const auto cta_coord = make_coord(blockIdx_x, blockIdx_y);  // (m,n,k)
+-  Tensor mC =
+-      make_tensor(make_gmem_ptr(a), select<0, 1>(shape_MNK), dA);  // (M,K)
+-  Tensor gC =
+-      local_tile(mC, select<0, 1>(TileShape{}), cta_coord);  // (BLK_M,BLK_N)
+-
+-  Tensor sC = make_tensor(make_smem_ptr(smem->factorize.smem_c.data()),
+-                          SmemLayoutC{});  // (BLK_M,BLK_N)
+-  Tensor sDiag = make_tensor(make_smem_ptr(smem->factorize.smem_diag.data()),
+-                             SmemLayoutC{});  // (BLK_M)
+-
+-  if (blockIdx_x < blockIdx_y) {
+-    // TRSM Upper Lx=A
+-    lx_solve_64x64_256_threads(thread_idx, LEGAL_BLK_N, sDiag, sC, gC);
+-  } else if (blockIdx_x > blockIdx_y) {
+-    // TRSM Lower xU=A
+-    xu_solve_64x64_256_threads(thread_idx, LEGAL_BLK_M, sDiag, sC, gC);
+-  } else {
+-    // GETRF diagonal LU=A
+-    lu_64x64_naive_256_threads<enable_static_pivoting>(
+-        thread_idx, LEGAL_BLK_M, LEGAL_BLK_N, sC, gC, pivot_count_ptr,
+-        criterion);
+-
+-    if (enabled) {
+-      load_matrix_sync(mmaFragC,
+-                       smem->factorize.smem_c.data() +
+-                           MmaFragCMap1d::fromMatrixCoord(warpTileCoord, BLK_M),
+-                       BLK_M);
+-
+-      // Final store of completed warp tile
+-      store_matrix_sync(a + MmaFragCMap1d::fromMatrixCoord(warpTileCoord, ldA),
+-                        mmaFragC, ldA);
+-    }
+-  }
+-
+-  synchronize_workgroup();
+-  if (thread_idx == 0) {
+-    __atomic_store_n(&task_table(blockIdx_x, blockIdx_y), true,
+-                     __ATOMIC_RELEASE);
+-  }
+-}
+-
+-template <bool enable_static_pivoting, class ShapeType, class T>
+-struct GetrfStaticPivot {
+- private:
+-  using bM = cute::Int<MACRO_TILE_M>;
+-  using bN = cute::Int<MACRO_TILE_N>;
+-  using bK = cute::Int<MACRO_TILE_K>;
+-  using TileShape = cute::Shape<bM, bN, bK>;  // (BLK_M, BLK_N, BLK_K)
+-
+-  // using SmemLayoutC = decltype(cute::composition(
+-  //     cute::Swizzle<6, 0, 6>{}, cute::Layout<cute::Shape<bM, bN>>{}));
+-  using SmemLayoutC = cute::Layout<cute::Shape<bM, bN>>;
+-
+-  constexpr static auto macroTileSize = rocwmma::make_coord2d(
+-      TBLOCK_X / warpSize * WARP_TILE_M, TBLOCK_Y* WARP_TILE_N);
+-
+- public:
+-  union Smem {
+-    struct {
+-      cute::array_aligned<
+-          std::byte, 2u * sizeof(InputT) *
+-                         (get<0>(macroTileSize) + get<1>(macroTileSize)) * bK{}>
+-          smem_ab;
+-    } update;
+-
+-    struct {
+-      cute::array_aligned<T, cute::cosize_v<SmemLayoutC>> smem_c;
+-      cute::array_aligned<T, cute::cosize_v<SmemLayoutC>> smem_diag;
+-    } factorize;
+-  };
+-
+-  static cdlsStatus_t get_buffer_size(const int m, const int n,
+-                                      size_t* buffer_size) {
+-    if (m <= 0) {
+-      return CDLS_STATUS_INVALID_VALUE;
+-    }
+-    if (m != n) {
+-      return CDLS_STATUS_INVALID_VALUE;
+-    }
+-    *buffer_size = sizeof(int) + sizeof(bool) *
+-                                     rocwmma::ceil_div(m, MACRO_TILE_M) *
+-                                     rocwmma::ceil_div(n, MACRO_TILE_N);
+-    return CDLS_STATUS_SUCCESS;
+-  }
+-
+-  static cdlsStatus_t call(const ShapeType m, const ShapeType n, T* C,
+-                           const ShapeType ldc, void* const workspace,
+-                           int* const pivot_count, const T criterion,
+-                           const hipStream_t stream) {
+-    if (m != n) {
+-      return CDLS_STATUS_INVALID_VALUE;
+-    }
+-    if (ldc < m) {
+-      return CDLS_STATUS_INVALID_VALUE;
+-    }
+-    if (C == nullptr || workspace == nullptr) {
+-      return CDLS_STATUS_INVALID_VALUE;
+-    }
+-    size_t buffer_size;
+-    get_buffer_size(m, m, &buffer_size);
+-    const auto workspace_ptr = static_cast<std::byte*>(workspace);
+-    CDLS_CHECK_HIP_ERROR(hipMemsetAsync(workspace, 0, buffer_size, stream));
+-    const auto task_idx_ptr = reinterpret_cast<int*>(workspace_ptr);
+-    const auto task_table =
+-        reinterpret_cast<bool*>(workspace_ptr + sizeof(int));
+-
+-    const auto pivot_count_ptr = reinterpret_cast<int*>(pivot_count);
+-
+-    const dim3 dimBlock(TBLOCK_X, TBLOCK_Y);
+-    const dim3 dimGrid(cute::ceil_div(m, bM{}), cute::ceil_div(n, bN{}));
+-
+-    const auto kernel = reinterpret_cast<void*>(
+-        getrf_static_pivot_kernel<enable_static_pivoting, ShapeType, T,
+-                                  TileShape, SmemLayoutC, Smem>);
+-
+-    auto m_ = m;
+-    auto n_ = n;
+-    auto ldc_ = ldc;
+-    auto task_idx_ptr_ = task_idx_ptr;
+-    auto task_table_ = task_table;
+-    auto pivot_count_ptr_ = pivot_count_ptr;
+-    auto criterion_ = criterion;
+-
+-    void* kernelArgs[] = {&m_,
+-                          &n_,
+-                          &C,
+-                          &ldc_,
+-                          &task_idx_ptr_,
+-                          &task_table_,
+-                          &pivot_count_ptr_,
+-                          &criterion_};
+-
+-    CDLS_CHECK_HIP_ERROR(hipExtLaunchKernel(kernel, dimGrid, dimBlock,
+-                                            kernelArgs, sizeof(Smem), stream,
+-                                            nullptr, nullptr, 0));
+-
+-    return CDLS_STATUS_SUCCESS;
+-  }
+-};
+-
+-extern "C" cdlsStatus_t cdlsDgetrf_bufferSize(const long m, const long n,
+-                                              size_t* buffer_size) {
+-  if (m != n) {
+-    return CDLS_STATUS_INVALID_VALUE;
+-  }
+-  return GetrfStaticPivot<false, long, double>::get_buffer_size(m, m,
+-                                                                buffer_size);
++extern "C" cdlsStatus_t cdlsDgetrf_bufferSize(long m, long n, size_t* bytes) {
++  if (!bytes || !supported_square(m, n)) return CDLS_STATUS_INVALID_VALUE;
++  *bytes = buffer_bytes(static_cast<int>(m));
++  return CDLS_STATUS_SUCCESS;
+ }
+ 
+-extern "C" cdlsStatus_t cdlsDgetrf(const cdlsHandle_t handle, const long m,
+-                                   const long n, double* C, const long ldc,
+-                                   void* const workspace,
+-                                   int* const pivot_count) {
+-  if (m != n) {
++extern "C" cdlsStatus_t cdlsDgetrf(cdlsHandle_t handle, long m, long n,
++                                   double* matrix, long lda, void* workspace,
++                                   int* pivot_count) {
++  if (!valid_factorization(handle, m, n, matrix, lda, workspace))
+     return CDLS_STATUS_INVALID_VALUE;
+-  }
+-  if (m <= 10240 && n < 10240 && ldc <= 10240) {
+-    return GetrfStaticPivot<false, int, double>::call(
+-        static_cast<int>(m), static_cast<int>(n), C, static_cast<int>(ldc),
+-        workspace, pivot_count, 0,
+-        static_cast<hipStream_t>(handle->stream_work));
+-  } else {
+-    return GetrfStaticPivot<false, long, double>::call(
+-        m, n, C, ldc, workspace, pivot_count, 0,
+-        static_cast<hipStream_t>(handle->stream_work));
+-  }
++  return factorize_no_pivot(handle, static_cast<int>(m), matrix, lda,
++                            workspace);
+ }
+ 
+-extern "C" cdlsStatus_t cdlsDgetrf_static_pivoting(const cdlsHandle_t handle,
+-                                                   const long m, const long n,
+-                                                   double* C, const long ldc,
+-                                                   void* const workspace,
+-                                                   int* const pivot_count,
+-                                                   const double criterion) {
+-  if (m != n) {
++extern "C" cdlsStatus_t cdlsDgetrf_static_pivoting(cdlsHandle_t handle, long m,
++                                                   long n, double* matrix,
++                                                   long lda, void* workspace,
++                                                   int* pivot_count,
++                                                   double criterion) {
++  if (!valid_factorization(handle, m, n, matrix, lda, workspace) ||
++      !pivot_count)
+     return CDLS_STATUS_INVALID_VALUE;
+-  }
+-  if (m <= 10240 && n < 10240 && ldc <= 10240) {
+-    return GetrfStaticPivot<true, int, double>::call(
+-        static_cast<int>(m), static_cast<int>(n), C, static_cast<int>(ldc),
+-        workspace, pivot_count, criterion,
+-        static_cast<hipStream_t>(handle->stream_work));
+-  } else {
+-    return GetrfStaticPivot<true, long, double>::call(
+-        m, n, C, ldc, workspace, pivot_count, criterion,
+-        static_cast<hipStream_t>(handle->stream_work));
+-  }
++  const auto stream = static_cast<hipStream_t>(handle->stream_work);
++  const int extent = static_cast<int>(m);
++  if (hipMemsetAsync(workspace, 0, buffer_bytes(extent), stream) != hipSuccess)
++    return CDLS_STATUS_EXECUTION_FAILED;
++  const int tiles = (extent - 1) / tile_size + 1;
++  return launch_tiles<true>(extent, matrix, lda, tiles, tiles,
++                            static_cast<int*>(workspace),
++                            internal_info(workspace, extent), stream, 0,
++                            pivot_count, criterion) == hipSuccess
++             ? CDLS_STATUS_SUCCESS
++             : CDLS_STATUS_EXECUTION_FAILED;
+ }
+diff --git a/third_party/ck_getrf_notices/NOTICE.txt b/third_party/ck_getrf_notices/NOTICE.txt
+index 389bfc3..bb260d8 100644
+--- a/third_party/ck_getrf_notices/NOTICE.txt
++++ b/third_party/ck_getrf_notices/NOTICE.txt
+@@ -11,3 +11,14 @@ Copyright (c) 2018-2025 Advanced Micro Devices, Inc. All rights reserved.
+ 
+ The accompanying CK, rocBLAS, and rocSOLVER notices are retained from that
+ source repository. No AMD runtime or CK headers are required by this CUDA path.
++
++The ROCm CK/MFMA implementation in src/rocm/getrf/tiled.h was ported on
++2026-10-06 from the ../ck_getrf working tree (including its uncommitted
++optimizations). The imported src/getrf.cpp had SHA-256
++237c4e72c569ac46a587664ca6a94ceab73a76c23a17f80130f3f796ca1ff1c6;
++include/task_order.hpp had SHA-256
++2aa0e8f6997fa5461da463145925bc29d53990dbff5fb159627874422b73d18b.
++Shared task ordering, reciprocal guards, LU panel updates, triangular
++recurrences and hybrid traversal now live in src/common/getrf. AMD CK/DPP
++and NVIDIA MMA/cp.async implementations remain in their backend directories.
++ROCm uses CK headers pinned to a8c5bd9b9ad950c3e742877e01cb784da91664e3.
