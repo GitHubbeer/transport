@@ -1,0 +1,545 @@
+diff --git a/.gitmodules b/.gitmodules
+index 8bbc3ac..0e71f03 100644
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -16,3 +16,7 @@
+ [submodule "third_party/ck_getrf"]
+ 	path = third_party/ck_getrf
+ 	url = git@github.com:TheCoreTeam/ck_getrf.git
++[submodule "third_party/cdls"]
++	path = third_party/cdls
++	url = git@github.com:TheCoreTeam/cdls.git
++	branch = dev-nvi-getrf
+diff --git a/benchmarks/run_ck_getrf_smoke.py b/benchmarks/run_ck_getrf_smoke.py
+index 76935c1..3a6845f 100644
+--- a/benchmarks/run_ck_getrf_smoke.py
++++ b/benchmarks/run_ck_getrf_smoke.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Validate the CK plugin through PaStiX Analyze/Numfact/Solve/Refine on a GPU."""
++"""Validate a GETRF plugin through PaStiX Analyze/Numfact/Solve/Refine on a GPU."""
+ import argparse
+ import csv
+ import math
+@@ -12,6 +12,8 @@ p = argparse.ArgumentParser(description=__doc__)
+ p.add_argument("solver", type=Path)
+ p.add_argument("plugin", type=Path)
+ p.add_argument("output", type=Path)
++p.add_argument("--backend-name", default="hip-hipmm-ck-getrf",
++               help="expected plugin identity (default: %(default)s)")
+ a = p.parse_args()
+ solver, plugin, out = a.solver.resolve(), a.plugin.resolve(), a.output.resolve()
+ if not solver.is_file() or not plugin.is_file():
+@@ -43,11 +45,11 @@ with (out / "summary.csv").open("w") as f:
+         timing = re.search(r"^PASTIX_TIMING,pastix_numfact,(\S+)", result.stdout, re.M)
+         value = float(residual[1]) if residual else math.inf
+         passed = (result.returncode == 0 and math.isfinite(value) and value < 1e-12
+-                  and "PaStiX FP64 Numfact device backend: hip-hipmm-ck-getrf" in result.stdout
++                  and f"PaStiX FP64 Numfact device backend: {a.backend_name}" in result.stdout
+                   and f"PaStiX FP64 device layout: {layout.upper()}" in result.stdout
+                   and "(SUCCESS)" in result.stdout and timing)
+         w.writerow([layout, update, result.returncode, value, timing[1] if timing else "", "PASS" if passed else "FAIL"])
+         f.flush()
+         print(f"{layout}/update{update}: {'PASS' if passed else 'FAIL'}, relative residual={value:.3e}", flush=True)
+         if not passed:
+-            raise SystemExit(f"PaStiX CK integration failed; inspect {out}")
++            raise SystemExit(f"PaStiX {a.backend_name} integration failed; inspect {out}")
+diff --git a/device/CMakeLists.txt b/device/CMakeLists.txt
+index 9bf0952..4397933 100644
+--- a/device/CMakeLists.txt
++++ b/device/CMakeLists.txt
+@@ -9,7 +9,7 @@ option(PASTIX_DEVICE_WITH_CUDA "Build the CUDA/RMM FP64 device plugin" OFF)
+ option(PASTIX_DEVICE_WITH_HIP "Build the HIP/hipMM FP64 device plugin" OFF)
+ option(PASTIX_DEVICE_HIP_USE_CDLS_GETRF "Use CDLS GETRF in the HIP plugin instead of rocSOLVER" OFF)
+ option(PASTIX_DEVICE_HIP_USE_CK_GETRF "Use CK FP64 no-pivot GETRF in the HIP plugin" OFF)
+-set(CDLS_ROOT "" CACHE PATH "CDLS installation or source tree (must provide include/ and lib/)")
++set(CDLS_ROOT "" CACHE PATH "Optional CDLS installation prefix; empty builds the pinned CDLS submodule")
+ option(PASTIX_DEVICE_BUILD_TESTS "Test the standalone device plugin contract" ON)
+ 
+ if(PASTIX_DEVICE_WITH_CUDA AND PASTIX_DEVICE_WITH_HIP)
+@@ -21,6 +21,25 @@ endif()
+ if(PASTIX_DEVICE_HIP_USE_CK_GETRF AND NOT PASTIX_DEVICE_WITH_HIP)
+   message(FATAL_ERROR "CK GETRF requires PASTIX_DEVICE_WITH_HIP=ON.")
+ endif()
++if(PASTIX_DEVICE_HIP_USE_CDLS_GETRF AND NOT PASTIX_DEVICE_WITH_HIP)
++  message(FATAL_ERROR "CDLS GETRF requires PASTIX_DEVICE_WITH_HIP=ON.")
++endif()
++
++function(pastix_add_cdls)
++  set(_pastix_cdls_source "${CMAKE_CURRENT_SOURCE_DIR}/../third_party/cdls")
++  if(NOT EXISTS "${_pastix_cdls_source}/CMakeLists.txt")
++    message(FATAL_ERROR "CDLS submodule is missing. Run git submodule update --init third_party/cdls.")
++  endif()
++  # Keep CDLS's standalone toolkit discovery and examples local to its build.
++  set(CMAKE_DISABLE_FIND_PACKAGE_CUDAToolkit ON)
++  set(CDLS_ENABLE_EXAMPLES OFF)
++  set(CDLS_ENABLE_TESTS OFF)
++  set(CDLS_ENABLE_OSDI26 OFF)
++  add_subdirectory("${_pastix_cdls_source}" "${CMAKE_CURRENT_BINARY_DIR}/cdls")
++  if(NOT TARGET cdls_rocm)
++    message(FATAL_ERROR "CDLS could not enable ROCm. Add the ROCm prefix to CMAKE_PREFIX_PATH.")
++  endif()
++endfunction()
+ 
+ add_library(pastix_device STATIC session.cpp)
+ target_compile_features(pastix_device PUBLIC cxx_std_17)
+@@ -73,14 +92,18 @@ if(PASTIX_DEVICE_WITH_HIP)
+   endif()
+   find_package(rmm REQUIRED CONFIG)
+   if(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
+-    find_path(CDLS_INCLUDE_DIR cdls/getrf.h
+-      HINTS ${CDLS_ROOT} ${CDLS_ROOT}/include
+-      PATH_SUFFIXES include)
+-    find_library(CDLS_ROCM_LIBRARY NAMES cdls_rocm
+-      HINTS ${CDLS_ROOT} ${CDLS_ROOT}/lib ${CDLS_ROOT}/lib64
+-      PATH_SUFFIXES lib lib64)
+-    if(NOT CDLS_INCLUDE_DIR OR NOT CDLS_ROCM_LIBRARY)
+-      message(FATAL_ERROR "CDLS GETRF selected, but cdls/getrf.h or libcdls_rocm was not found. Set CDLS_ROOT to the CDLS install prefix.")
++    if(CDLS_ROOT)
++      find_path(CDLS_INCLUDE_DIR cdls/getrf.h
++        HINTS ${CDLS_ROOT} ${CDLS_ROOT}/include
++        PATH_SUFFIXES include)
++      find_library(CDLS_ROCM_LIBRARY NAMES cdls_rocm
++        HINTS ${CDLS_ROOT} ${CDLS_ROOT}/lib ${CDLS_ROOT}/lib64
++        PATH_SUFFIXES lib lib64)
++      if(NOT CDLS_INCLUDE_DIR OR NOT CDLS_ROCM_LIBRARY)
++        message(FATAL_ERROR "CDLS GETRF selected, but cdls/getrf.h or libcdls_rocm was not found. Set CDLS_ROOT to the CDLS install prefix.")
++      endif()
++    else()
++      pastix_add_cdls()
+     endif()
+   endif()
+   get_target_property(_pastix_hipmm_links rmm::rmm INTERFACE_LINK_LIBRARIES)
+@@ -99,8 +122,12 @@ if(PASTIX_DEVICE_WITH_HIP)
+     target_compile_definitions(pastix_device_hip PRIVATE PASTIX_DEVICE_HIP_USE_CK_GETRF=1)
+   endif()
+   if(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
+-    target_include_directories(pastix_device_hip PRIVATE ${CDLS_INCLUDE_DIR})
+-    target_link_libraries(pastix_device_hip PRIVATE ${CDLS_ROCM_LIBRARY})
++    if(CDLS_ROOT)
++      target_include_directories(pastix_device_hip PRIVATE ${CDLS_INCLUDE_DIR})
++      target_link_libraries(pastix_device_hip PRIVATE ${CDLS_ROCM_LIBRARY})
++    else()
++      target_link_libraries(pastix_device_hip PRIVATE cdls_rocm)
++    endif()
+     target_compile_definitions(pastix_device_hip PRIVATE PASTIX_DEVICE_HIP_USE_CDLS_GETRF=1)
+   endif()
+   set_target_properties(pastix_device_hip PROPERTIES
+diff --git a/device/README.md b/device/README.md
+index 77187b5..0c96234 100644
+--- a/device/README.md
++++ b/device/README.md
+@@ -194,12 +194,48 @@ all four 1D update strategies, verifies CK backend selection and checks the
+ solve residual. The dense kernel speedups in the submodule are not end-to-end
+ PaStiX speedups.
+ 
+-To select CDLS's ordinary FP64 GETRF entry, build/install `cdls_rocm` first,
+-then configure the HIP plugin with `-DPASTIX_DEVICE_HIP_USE_CDLS_GETRF=ON`
+-and `-DCDLS_ROOT=/path/to/cdls-prefix`. The default remains rocSOLVER. The
+-CDLS call uses the PaStiX queue stream and caller-owned workspace. Its ordinary
+-entry does not report singular pivots, so this route reports `info = 0` after
+-successful submission; use it where that status behavior is acceptable.
++To select CDLS's ordinary FP64 GETRF entry, initialize the pinned submodule
++from `TheCoreTeam/cdls` (`dev-nvi-getrf`) and build it with the HIP plugin:
++
++```bash
++git submodule update --init third_party/cdls
++cmake -S device -B build-mi300a-roc \
++  -DPASTIX_DEVICE_WITH_HIP=ON \
++  -DPASTIX_DEVICE_HIP_USE_CDLS_GETRF=ON \
++  -DPASTIX_DEVICE_HIP_USE_CK_GETRF=OFF -DCDLS_ROOT= \
++  -DCMAKE_PREFIX_PATH="$ROCM_PATH;$PWD/.deps/hipmm" \
++  -Drmm_DIR="$PWD/.deps/hipmm/lib64/cmake/rmm" \
++  -Drapids_logger_DIR="$PWD/.deps/hipmm/lib64/cmake/rapids_logger" \
++  -DhipCCL_DIR="$PWD/.deps/hipmm/lib64/cmake/hipccl" \
++  -Dlibhipcxx_DIR="$PWD/.deps/hipmm/lib64/rapids/cmake/libhipcxx" \
++  -DCMAKE_CXX_COMPILER="$ROCM_PATH/llvm/bin/clang++" \
++  -DCMAKE_HIP_COMPILER="$ROCM_PATH/llvm/bin/clang++" \
++  -DCMAKE_HIP_ARCHITECTURES=gfx942
++cmake --build build-mi300a-roc -j2
++ctest --test-dir build-mi300a-roc --output-on-failure
++```
++
++CDLS fetches pinned Composable Kernel headers unless an existing checkout is
++provided through `CDLS_CK_SOURCE_DIR`. An explicit
++`-DCDLS_ROOT=/path/to/cdls-prefix` instead uses a prebuilt installation.
++The default build option remains rocSOLVER; the CDLS plugin identifies itself
++as `hip-hipmm-cdls-getrf`. Each queue owns a handle created by `cdlsCreate`,
++including the rocBLAS state required by the hybrid path above n=4096. Calls
++temporarily bind both CDLS streams to the PaStiX queue and restore the owned
++streams before handle destruction. Workspace remains caller-owned. CDLS's
++ordinary entry does not expose singular-pivot status, so this route reports
++`info = 0` after successful submission.
++
++The `device_cdls_getrf_contract` test covers the hybrid path with n=4161,
++padded leading dimensions, offset matrix views, workspace reuse, queue ordering
++and synchronous/asynchronous calls. End-to-end validation uses:
++
++```bash
++python3 benchmarks/run_ck_getrf_smoke.py \
++  build-mi300a-core/example/simple_solve_and_refine \
++  build-mi300a-roc/libpastix_device_hip.so results/cdls-smoke \
++  --backend-name hip-hipmm-cdls-getrf
++```
+ 
+ The HIP plugin implements the same v3.4 contract with HIP queues/events,
+ hipMM async source/pool resources, rocBLAS FP64 operations and either rocSOLVER
+diff --git a/device/fp64_getrf_runtime.hpp b/device/fp64_getrf_runtime.hpp
+index 69c878a..d924c7d 100644
+--- a/device/fp64_getrf_runtime.hpp
++++ b/device/fp64_getrf_runtime.hpp
+@@ -5,6 +5,7 @@
+ #include "panel.hpp"
+ #include "trsm_layout.hpp"
+ #include "lu_residency.hpp"
++#include "getrf_workload_audit.hpp"
+ #include <array>
+ #include <vector>
+ 
+@@ -86,7 +87,7 @@ public:
+         host_.begin_panel(c);
+         diagonal_panel_sequence(
+             [&]{session_.geadd(ctx.work_stream[0],PASTIX_DEVICE_TRANS,1.,b,1.,a);},
+-            [&]{host_.begin_factor(c);factorize_panel(panel_,ctx.work_stream[0],n,l.view,ld,ctx.h2d_stream);host_.end_factor(c);},
++            [&]{audit_.record(c-matrix_.cblktab,n,ld,session_.name().c_str(),ctx.work_stream[0]);host_.begin_factor(c);factorize_panel(panel_,ctx.work_stream[0],n,l.view,ld,ctx.h2d_stream);host_.end_factor(c);},
+             [&]{session_.geadd(ctx.work_stream[0],PASTIX_DEVICE_TRANS,1.,a,0.,b);});
+         host_.end_panel(c);
+         auto trsm=[&](Pointer p,int32_t diag) {
+@@ -171,6 +172,7 @@ private:
+     std::vector<ColumnStorage> columns_;
+     std::vector<Event> events_;
+     Fp64PanelRuntime panel_;
++    GetrfWorkloadAudit audit_;
+ };
+ }
+ #endif
+diff --git a/device/hip/DEPENDENCIES.md b/device/hip/DEPENDENCIES.md
+index 835f3c6..7404fb8 100644
+--- a/device/hip/DEPENDENCIES.md
++++ b/device/hip/DEPENDENCIES.md
+@@ -10,7 +10,11 @@ default plugin build. hipBLAS is installed but not used by this plugin.
+ hipSOLVER is not required. With the default build, the plugin calls
+ `rocsolver_dgetrf_npvt` and uses rocBLAS workspace queries in **bytes**. The
+ optional `PASTIX_DEVICE_HIP_USE_CDLS_GETRF` build instead links `cdls_rocm` and
+-uses its ordinary FP64 GETRF kernel; set `CDLS_ROOT` to a prefix containing
++uses its ordinary FP64 GETRF kernel. With `CDLS_ROOT` empty it builds the pinned
++`third_party/cdls` submodule from `TheCoreTeam/cdls` (`dev-nvi-getrf`), including
++the handle's rocBLAS state needed for large hybrid panels. CDLS requires wave64
++gfx90a/gfx94x and fetches pinned CK headers (or uses `CDLS_CK_SOURCE_DIR`).
++Alternatively, set `CDLS_ROOT` to an installation prefix containing
+ `include/cdls/getrf.h`, `include/cdls/internal/common.h` and `lib/libcdls_rocm`.
+ The CDLS ordinary entry reports no singular-pivot status.
+ 
+diff --git a/device/hip/backend.cpp b/device/hip/backend.cpp
+index 6e09b6d..fcea657 100644
+--- a/device/hip/backend.cpp
++++ b/device/hip/backend.cpp
+@@ -48,6 +48,15 @@ void blas_check(rocblas_status s)
+ }
+ void solver_check(rocblas_status s)
+ { blas_check(s); }
++#if defined(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
++void cdls_check(cdlsStatus_t status)
++{
++    if (status != CDLS_STATUS_SUCCESS)
++        throw Failure(status == CDLS_STATUS_ALLOC_FAILED ? PASTIX_DEVICE_OUT_OF_MEMORY
++                      : status == CDLS_STATUS_INVALID_VALUE ? PASTIX_DEVICE_INVALID
++                      : PASTIX_DEVICE_RUNTIME_ERROR, "CDLS GETRF operation failed");
++}
++#endif
+ 
+ template<class F> pastix_device_status boundary(pastix_device_error *error, F &&f) noexcept
+ {
+@@ -86,12 +95,18 @@ struct Queue {
+     hipStream_t stream = nullptr;
+     rocblas_handle blas = nullptr;
+     rocblas_handle solver = nullptr;
++#if defined(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
++    cdlsHandle_t cdls = nullptr;
++#endif
+     void *workspace = nullptr;
+     size_t workspace_bytes = 0;
+     int *info = nullptr;
+     int64_t panel_rows = 0, panel_cols = 0, panel_ld = 0;
+     uint64_t panel_bytes = 0;
+     ~Queue() {
++#if defined(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
++        if (cdls) (void)cdlsDestroy(cdls);
++#endif
+         if (solver) rocblas_destroy_handle(solver);
+         if (blas) rocblas_destroy_handle(blas);
+         if (stream) (void)hipStreamDestroy(stream);
+@@ -183,6 +198,30 @@ struct pastix_device_context_impl {
+ };
+ 
+ namespace {
++#if defined(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
++void cdls_prepare(Queue &q)
++{
++    // The hybrid path needs the rocBLAS state owned by a real CDLS handle.
++    // Create it during the workspace query, before asynchronous submission.
++    if (!q.cdls) cdls_check(cdlsCreate(&q.cdls));
++}
++void cdls_submit(Queue &q, pastix_device_matrix a, double *pa, void *work)
++{
++    require(q.cdls, "Query CDLS workspace before submission");
++    struct StreamBinding {
++        cdlsHandle_t handle;
++        void *work, *memset;
++        StreamBinding(cdlsHandle_t h, hipStream_t stream)
++            : handle(h), work(h->stream_work), memset(h->stream_memset)
++        { handle->stream_work = stream; handle->stream_memset = stream; }
++        ~StreamBinding()
++        { handle->stream_work = work; handle->stream_memset = memset; }
++    } binding(q.cdls, q.stream);
++    // CDLS captures the streams while submitting. Restore its owned streams
++    // afterward so cdlsDestroy never destroys the borrowed PaStiX stream.
++    cdls_check(cdlsDgetrf(q.cdls, long(a.rows), long(a.cols), pa, long(a.ld), work, nullptr));
++}
++#endif
+ #if defined(PASTIX_DEVICE_HIP_USE_CK_GETRF)
+ size_t ck_workspace(pastix_device_matrix a)
+ {
+@@ -407,15 +446,13 @@ pastix_device_status getrf(pastix_device_context ctx, uint32_t queue, pastix_dev
+         size_t bytes = 0;
+         require(cdlsDgetrf_bufferSize(long(a.rows), long(a.cols), &bytes) == CDLS_STATUS_SUCCESS,
+                 "CDLS GETRF workspace query failed");
++        cdls_prepare(q);
+         if (bytes > q.workspace_bytes) {
+             void *replacement = ctx->pool->allocate_async(bytes, q.stream);
+             if (q.workspace) ctx->pool->deallocate_async(q.workspace, q.workspace_bytes, q.stream);
+             q.workspace = replacement; q.workspace_bytes = bytes;
+         }
+-        cdlsHandle handle{reinterpret_cast<void *>(q.stream), reinterpret_cast<void *>(q.stream)};
+-        require(cdlsDgetrf(&handle, long(a.rows), long(a.cols), pa, long(a.ld), q.workspace, nullptr)
+-                    == CDLS_STATUS_SUCCESS,
+-                "CDLS GETRF submission failed");
++        cdls_submit(q, a, pa, q.workspace);
+         hip_check(hipStreamSynchronize(q.stream));
+         *info = 0; // CDLS's ordinary entry does not report singular pivots.
+ #else
+@@ -467,6 +504,7 @@ pastix_device_status getrf_workspace(pastix_device_context ctx, uint32_t queue,
+         size_t bytes = 0;
+         require(cdlsDgetrf_bufferSize(long(a.rows), long(a.cols), &bytes) == CDLS_STATUS_SUCCESS,
+                 "CDLS GETRF workspace query failed");
++        cdls_prepare(q);
+         q.panel_rows = a.rows; q.panel_cols = a.cols; q.panel_ld = a.ld;
+         q.panel_bytes = bytes; *out = bytes;
+ #else
+@@ -507,11 +545,8 @@ pastix_device_status getrf_submit(pastix_device_context ctx, uint32_t queue,
+         ck_submit(q, a, pa, static_cast<int *>(device_info), work, size_t(q.panel_bytes));
+ #elif defined(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
+         require(a.rows == a.cols, "CDLS GETRF requires a square matrix");
+-        cdlsHandle handle{reinterpret_cast<void *>(q.stream), reinterpret_cast<void *>(q.stream)};
+         *host_info = 0; // The ordinary CDLS entry does not write a pivot status.
+-        require(cdlsDgetrf(&handle, long(a.rows), long(a.cols), pa, long(a.ld), work, nullptr)
+-                    == CDLS_STATUS_SUCCESS,
+-                "CDLS GETRF submission failed");
++        cdls_submit(q, a, pa, work);
+ #else
+         solver_check(rocblas_set_workspace(q.solver, work, size_t(q.panel_bytes)));
+         solver_check(rocsolver_dgetrf_npvt(q.solver, int(a.rows), int(a.cols), pa, int(a.ld), host_info));
+@@ -766,6 +801,8 @@ const pastix_device_backend api = {
+     PASTIX_DEVICE_ABI_MAJOR, PASTIX_DEVICE_ABI_MINOR, sizeof(pastix_device_backend), 0,
+ #if defined(PASTIX_DEVICE_HIP_USE_CK_GETRF)
+     "hip-hipmm-ck-getrf",
++#elif defined(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
++    "hip-hipmm-cdls-getrf",
+ #else
+     "hip-hipmm",
+ #endif
+diff --git a/device/tests/CMakeLists.txt b/device/tests/CMakeLists.txt
+index 2c0c3ab..4264372 100644
+--- a/device/tests/CMakeLists.txt
++++ b/device/tests/CMakeLists.txt
+@@ -67,13 +67,22 @@ if(TARGET pastix_device_hip)
+   set_tests_properties(device_accelerated_fp64_hip PROPERTIES RESOURCE_LOCK pastix_hip_device)
+ endif()
+ if(PASTIX_DEVICE_HIP_USE_CK_GETRF)
+-  add_executable(device_ck_getrf_contract ck_getrf_contract.cpp)
++  add_executable(device_ck_getrf_contract hybrid_getrf_contract.cpp)
+   target_link_libraries(device_ck_getrf_contract PRIVATE pastix_device)
+   add_test(NAME device_ck_getrf_contract
+     COMMAND device_ck_getrf_contract $<TARGET_FILE:pastix_device_hip>)
+   set_tests_properties(device_ck_getrf_contract PROPERTIES
+     TIMEOUT 300 RESOURCE_LOCK pastix_hip_device)
+ endif()
++if(PASTIX_DEVICE_HIP_USE_CDLS_GETRF)
++  add_executable(device_cdls_getrf_contract hybrid_getrf_contract.cpp)
++  target_compile_definitions(device_cdls_getrf_contract PRIVATE PASTIX_TEST_CDLS_GETRF=1)
++  target_link_libraries(device_cdls_getrf_contract PRIVATE pastix_device)
++  add_test(NAME device_cdls_getrf_contract
++    COMMAND device_cdls_getrf_contract $<TARGET_FILE:pastix_device_hip>)
++  set_tests_properties(device_cdls_getrf_contract PROPERTIES
++    TIMEOUT 300 RESOURCE_LOCK pastix_hip_device)
++endif()
+ if(TARGET pastix_device_cuda)
+   add_test(NAME device_accelerated_fp64_cuda
+     COMMAND device_accelerated_fp64_contract $<TARGET_FILE:pastix_device_cuda>)
+diff --git a/device/tests/contract.cpp b/device/tests/contract.cpp
+index 79046fe..ad2cbcd 100644
+--- a/device/tests/contract.cpp
++++ b/device/tests/contract.cpp
+@@ -152,9 +152,10 @@ void fp64_contract(const char *plugin)
+         s.release(0, lu.buffer);
+     }
+     auto singular = matrix(s, {1, 0, 0, 0}, 2, 2, 2);
+-    expect(s.getrf_nopiv(0, singular) == 2, "LU did not report the singular pivot");
++    const bool cdls = s.name() == "hip-hipmm-cdls-getrf";
++    expect(s.getrf_nopiv(0, singular) == (cdls ? 0 : 2), "Unexpected singular LU status");
+     auto needs_swap = matrix(s, {0, 1, 1, 1}, 2, 2, 2);
+-    expect(s.getrf_nopiv(0, needs_swap) == 1, "LU silently used row pivoting");
++    expect(s.getrf_nopiv(0, needs_swap) == (cdls ? 0 : 1), "Unexpected zero-pivot LU status");
+     rejects([&] { s.allocate(0, 64u << 20); }, PASTIX_DEVICE_OUT_OF_MEMORY);
+     // OOM is recoverable, and the preceding results remain usable.
+     s.download(0, rhs.buffer, 0, result.data(), 32);
+@@ -421,7 +422,8 @@ void panel_workspace_contract(const char *plugin)
+     auto work = s.allocate(0, std::max<uint64_t>(bytes, 1));
+     s.getrf_submit(0, singular, work, info);
+     s.synchronize(0);
+-    expect(info[0] == 1, "Asynchronous LU silently swapped rows");
++    expect(info[0] == (s.name() == "hip-hipmm-cdls-getrf" ? 0 : 1),
++           "Unexpected asynchronous zero-pivot LU status");
+     s.release(0, work); s.release(0, singular.buffer);
+     s.synchronize(7);
+     expect(s.allocated_bytes() == 0, "Panel workspace allocation accounting leaked");
+@@ -625,7 +627,8 @@ int main(int argc, char **argv)
+         const bool numerical = mode != "mock";
+         if (numerical) {
+             Session identity(argv[2], config(0));
+-            expect(mode == "hip" ? (identity.name() == "hip-hipmm" || identity.name() == "hip-hipmm-ck-getrf")
++            expect(mode == "hip" ? (identity.name() == "hip-hipmm" || identity.name() == "hip-hipmm-ck-getrf"
++                                    || identity.name() == "hip-hipmm-cdls-getrf")
+                                   : identity.name() == "cuda-rmm", "Unexpected hardware backend");
+             std::cout << "Backend: " << identity.name() << '\n';
+         }
+diff --git a/device/tests/ck_getrf_contract.cpp b/device/tests/hybrid_getrf_contract.cpp
+similarity index 74%
+rename from device/tests/ck_getrf_contract.cpp
+rename to device/tests/hybrid_getrf_contract.cpp
+index 33fcb17..186929e 100644
+--- a/device/tests/ck_getrf_contract.cpp
++++ b/device/tests/hybrid_getrf_contract.cpp
+@@ -7,13 +7,20 @@
+ 
+ using namespace pastix_device;
+ namespace {
++#if defined(PASTIX_TEST_CDLS_GETRF)
++constexpr const char *backend_name = "hip-hipmm-cdls-getrf";
++constexpr int singular_status = 0; // The ordinary CDLS API does not expose info.
++#else
++constexpr const char *backend_name = "hip-hipmm-ck-getrf";
++constexpr int singular_status = 514;
++#endif
+ void expect(bool ok, const char *message)
+ { if (!ok) throw std::runtime_error(message); }
+ 
+ void contract(const char *plugin)
+ {
+     Session s(plugin, {sizeof(pastix_device_config), 0, 1u << 20, 512u << 20, 8});
+-    expect(s.name() == "hip-hipmm-ck-getrf", "CK GETRF plugin was not selected");
++    expect(s.name() == backend_name, "Requested hybrid GETRF plugin was not selected");
+     // Exceed tail4096, cross a 512-column panel, and keep a strided subview.
+     constexpr int n = 4161, ld = n + 7;
+     constexpr uint64_t offset = 3 * sizeof(double);
+@@ -41,8 +48,8 @@ void contract(const char *plugin)
+         s.event_record(0, event); s.event_wait(6, event);
+         s.download(6, buffer, offset, output.data(), output.size() * sizeof(double));
+         s.synchronize(6);
+-        expect(info[0] == (singular ? 514 : 0) && info[1] == 12345,
+-               "Mapped info lost the first global pivot, failed to reset, or overwrote its guard");
++        expect(info[0] == (singular ? singular_status : 0) && info[1] == 12345,
++               "LU status failed to reset, report the expected pivot, or preserve its guard");
+         for (int j = 0; j < n; ++j) for (int i = 0; i < ld; ++i) {
+             double expected = i >= n ? guard : i == j ? 4.
+                                   : i == j + 1 ? .01 : j == i + 1 ? .03 : 0.;
+@@ -51,22 +58,22 @@ void contract(const char *plugin)
+                    "Hybrid panel LU factors or padding are incorrect");
+         }
+     }
+-    // The synchronous convenience entry must report the same global pivot.
++    // The synchronous convenience entry must follow the same status policy.
+     for (int j = 0; j < n; ++j) for (int i = 0; i < n; ++i)
+         input[size_t(j) * ld + i] = i == j && i != 513 ? 1. : 0.;
+     s.upload(0, buffer, offset, input.data(), input.size() * sizeof(double));
+-    expect(s.getrf_nopiv(0, a) == 514, "Synchronous CK LU lost global singular status");
++    expect(s.getrf_nopiv(0, a) == singular_status, "Synchronous LU returned the wrong status");
+     s.event_record(0, event); s.event_wait(7, event);
+     s.release(7, work); s.release(7, buffer); s.synchronize(7);
+     s.host_release(info); s.event_destroy(event);
+-    expect(s.allocated_bytes() == 0, "Caller-owned CK panel resources leaked");
+-    std::cout << "CK hybrid GETRF: strided subview, mapped status, first pivot, reuse and queue ordering passed\n";
++    expect(s.allocated_bytes() == 0, "Caller-owned hybrid panel resources leaked");
++    std::cout << backend_name << ": hybrid GETRF, strided subview, status, reuse and queue ordering passed\n";
+ }
+ }
+ int main(int argc, char **argv)
+ {
+     try {
+-        expect(argc == 2, "usage: ck_getrf_contract plugin");
++        expect(argc == 2, "usage: hybrid_getrf_contract plugin");
+         contract(argv[1]); return 0;
+     } catch (const std::exception &e) { std::cerr << e.what() << '\n'; return 1; }
+ }
+diff --git a/example/simple_solve_and_refine.c b/example/simple_solve_and_refine.c
+index a3f2b1f..5ccd619 100644
+--- a/example/simple_solve_and_refine.c
++++ b/example/simple_solve_and_refine.c
+@@ -19,6 +19,9 @@
+ #include <spm.h>
+ #include <sys/time.h>
+ 
++/* Internal parameter serializer used only by the opt-in evidence capture. */
++extern void pastix_param2csv(const pastix_data_t *, FILE *);
++
+ /// @brief Return the current wall-clock time in seconds using gettimeofday.
+ static double
+ simpleClockGet( void )
+@@ -58,6 +61,7 @@ main( int argc, char **argv )
+     int            check   = 1;
+     int            nrhs    = 1;
+     int            rc      = 0;
++    int            solve_refine_completed = 0;
+     double         total_timer, timer;
+     double         stage_options_time      = 0.;
+     double         stage_init_time         = 0.;
+@@ -143,6 +147,13 @@ main( int argc, char **argv )
+         }
+         printf("PaStiX explicit device backend: %s; pool budget: %llu bytes\n",device_path,pool);
+     }
++    const char *audit_parameters = getenv("PASTIX_GETRF_PARAMETERS_CSV");
++    if (audit_parameters) {
++        FILE *audit_file = fopen(audit_parameters, "wx");
++        if (!audit_file) { rc = PASTIX_ERR_BADPARAMETER; goto cleanup; }
++        pastix_param2csv(pastix_data, audit_file);
++        fclose(audit_file);
++    }
+ 
+     /**
+      * Read the sparse matrix with the driver
+@@ -264,6 +275,7 @@ main( int argc, char **argv )
+         fprintf( stderr, "PaStiX solve/refine failed: %d\n", rc );
+         goto cleanup;
+     }
++    solve_refine_completed = 1;
+ 
+     if ( check ) {
+         timer = simpleClockGet();
+@@ -312,6 +324,10 @@ cleanup:
+     simplePrintTiming( "pastix_numfact", dparm[DPARM_FACT_TIME] );
+     simplePrintTiming( "pastix_solve", dparm[DPARM_SOLV_TIME] );
+     simplePrintTiming( "pastix_refine", dparm[DPARM_REFINE_TIME] );
++    if ( solve_refine_completed ) {
++        printf( "PASTIX_REFINEMENT_ITERATIONS,%lld\n", (long long)iparm[IPARM_NBITER] );
++        printf( "PASTIX_REFINEMENT_TOLERANCE,%.9e\n", dparm[DPARM_EPSILON_REFINEMENT] );
++    }
+ 
+     return rc;
+ }
+diff --git a/third_party/cdls b/third_party/cdls
+new file mode 160000
+index 0000000..44067f1
+--- /dev/null
++++ b/third_party/cdls
+@@ -0,0 +1 @@
++Subproject commit 44067f1e654e5c4a593cc82c34cde4f4c48a62b2

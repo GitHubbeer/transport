@@ -1,0 +1,78 @@
+MI300A audikw_1 GETRF evidence, 2026-10-07
+
+All new timing and dispatch evidence uses ROCm 7.2.4, rocSOLVER
+3.32.0.dabb6df2b9, rocBLAS 5.2.0.dabb6df2b9. Historical ROCm 6.4.2
+records are stored separately and must not supply new-table timings.
+
+Recompute on CPU from this completed archive (no GPU required):
+  python3 analysis/scripts/analyze.py /absolute/path/to/20261007-audikw-getrf
+  python3 analysis/scripts/report.py /absolute/path/to/20261007-audikw-getrf
+
+analyze.py asserts that 270 pairs, 18 validation records and all repeated
+kernel signatures are present, all kernel/API correlations have exactly one
+ROI, input capture and distribution geometry match, and the diagonal column
+sum equals audikw_1's 943695 columns. It writes summary.csv, samples.csv,
+trial-statistics.csv, validation.csv, kernel-counts.csv, kernel-categories.csv,
+kernel-attribution.csv and verification.json from raw logs/trace CSVs.
+
+The raw timing rows are also retained verbatim in timing/trial*.log;
+analysis/samples.csv is a lossless field parse, not a replacement for logs.
+For profile repeats, call_id=0/1/2 is local to a (backend,n,lda) replay.
+sparse_call_id and cblk in kernel-attribution.csv identify the captured
+original solver call. inputs/manifest.json pins its original contents.
+
+Fresh GPU reproduction must run serially in an allocated MI300A SPX GPU
+with at least the original memory availability. Restore the archived source
+working tree and the new getrf_workload_audit.hpp into the original repository.
+Keep the original parameters, compiler/dependencies and matrix SHA. The
+environment/*CMakeCache.txt files and raw build logs pin the configurations.
+The ordinary CDLS plugin and library were copied without rebuilding them.
+
+Commands issued from the repository root (replace OUT with a fresh directory):
+  cmake --build build-mi300a-core --target simple_solve_and_refine -j8
+  mkdir -p OUT/binaries OUT/environment OUT/workload OUT/inputs OUT/timing OUT/traces OUT/analysis
+  cp build-mi300a-core/example/simple_solve_and_refine OUT/binaries/solver
+  cp build-mi300a-roc/libpastix_device_hip.so OUT/binaries/cdls.so
+  cp build-mi300a-roc/cdls/src/rocm/libcdls_rocm.so OUT/binaries/
+  cp results/20261002-ck-vs-rocsolver/binaries/rocsolver.so OUT/binaries/
+  /nfsapps/ubuntu-24.04/opt/rocm-7.2.4/bin/hipcc -O2 -std=c++17 -fPIC -shared -Ithird_party/cdls/include benchmarks/getrf_evidence/capture.cpp -ldl -o OUT/binaries/capture.so
+  /nfsapps/ubuntu-24.04/opt/rocm-7.2.4/bin/hipcc -O3 -std=c++17 -Ithird_party/cdls/include benchmarks/getrf_evidence/replay.cpp -LOUT/binaries -Wl,-rpath,'$ORIGIN' -lcdls_rocm -lrocblas -lrocsolver -o OUT/binaries/replay
+  /nfsapps/ubuntu-24.04/opt/rocm-7.2.4/bin/hipcc -O3 -std=c++17 -DGETRF_PROFILE -Ithird_party/cdls/include benchmarks/getrf_evidence/replay.cpp -LOUT/binaries -Wl,-rpath,'$ORIGIN' -lcdls_rocm -lrocblas -lrocsolver -lrocprofiler-sdk-roctx -o OUT/binaries/replay-profile
+  python3 benchmarks/getrf_evidence/inventory.py OUT
+  python3 benchmarks/getrf_evidence/workload.py OUT distribution
+  python3 benchmarks/getrf_evidence/select_inputs.py OUT
+  python3 benchmarks/getrf_evidence/workload.py OUT capture
+  python3 benchmarks/getrf_evidence/measure.py OUT timing
+  python3 benchmarks/getrf_evidence/measure.py OUT profile
+  python3 benchmarks/getrf_evidence/historical.py OUT
+  python3 benchmarks/getrf_evidence/analyze.py OUT
+  python3 benchmarks/getrf_evidence/report.py OUT
+
+workload.py returns the raw solver exit code. In this completed run both
+distribution and capture returned 255 because the solver's forward-error
+test failed, although factorization completed and backward residual passed.
+Review the log before continuing; do not blindly equate exit 255 with a
+successful solver validation. All representative GETRF replays passed their
+separate info, LU reconstruction and bitwise padding checks. The first failed
+preflight (parameter dump before the output directory existed) is retained in
+workload/failed-preflight; it contributed no workload or timing observations.
+
+The same fixed shape selection file must be generated before any timing.
+Every exact command, environment, timestamp and status for workload, timing,
+trace and environment probes is retained beside its log in *.command.json.
+The build invocations above are the explicit invocations used for this run;
+compiler logs are in environment. New runs refuse to overwrite raw logs.
+
+Capture synchronization perturbs the full sparse run. These sparse numfact
+times are excluded from performance claims. The only performance table uses
+the separate non-profiler replay binary; roctx is absent from its dependencies.
+LD_PRELOAD instrumentation is used only in workload capture, never in timing.
+
+CDLS ordinary API has no public numerical info. replay.cpp reads the internal
+workspace int defined by the pinned source; this diagnostic must be rechecked
+if the library changes. It includes the library's normal initialization in
+all measured calls and never replaces it with an untimed reset.
+
+Full padding (rows n..lda-1) is the original sparse off-diagonal content,
+not a synthetic sentinel. Restore and compare all lda*n elements, retaining
+byte identity of non-participating rows.

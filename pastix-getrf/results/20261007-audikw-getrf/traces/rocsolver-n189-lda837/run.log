@@ -1,0 +1,15 @@
+W20261007 05:12:45.976282 125593270164544 simple_timer.cpp:55] [rocprofv3] tool initialization ::     0.002211 sec
+W20261007 05:12:45.976343 125593270164544 tool.cpp:2422] HIP (compiler) version 7.2.0 initialized (instance=0)
+W20261007 05:12:45.999910 125593270164544 simple_timer.cpp:55] [rocprofv3] '/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/binaries/replay-profile /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/inputs/call9521-n189-lda837.bin 189 837 rocsolver' ::     0.000000 sec
+W20261007 05:12:46.000057 125593270164544 tool.cpp:2422] MARKER (ROCTx) version 1.1.0 initialized (instance=0)
+W20261007 05:12:46.003099 125593270164544 tool.cpp:2422] HIP (runtime) version 7.2.0 initialized (instance=0)
+W20261007 05:12:46.122152 125593270164544 tool.cpp:2422] HSA version 8.20.4 initialized (instance=0)
+W20261007 05:12:46.573840 125593270164544 simple_timer.cpp:55] [rocprofv3] '/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/binaries/replay-profile /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/inputs/call9521-n189-lda837.bin 189 837 rocsolver' ::     0.573930 sec
+E20261007 05:12:46.716092 125593270164544 output_stream.cpp:111] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/traces/rocsolver-n189-lda837/trace_kernel_trace.csv
+E20261007 05:12:46.860099 125593270164544 output_stream.cpp:111] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/traces/rocsolver-n189-lda837/trace_hip_api_trace.csv
+E20261007 05:12:47.028988 125593270164544 output_stream.cpp:111] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/traces/rocsolver-n189-lda837/trace_marker_api_trace.csv
+E20261007 05:12:47.035451 125593270164544 output_stream.cpp:111] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/traces/rocsolver-n189-lda837/trace_agent_info.csv
+W20261007 05:12:47.057036 125593270164544 simple_timer.cpp:55] [rocprofv3] output generation ::     0.475968 sec
+W20261007 05:12:47.057974 125593270164544 simple_timer.cpp:55] [rocprofv3] tool finalization ::     0.477081 sec
+device=AMD Instinct MI300A arch=gfx942:sramecc+:xnack- HIP=70253211 CUs=228 rocSOLVER=3.32.0.dabb6df2b9 rocBLAS=5.2.0.dabb6df2b9 n=189 lda=837 input=/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/inputs/call9521-n189-lda837.bin stream_mode=nonblocking fp64 npvt warmup=5 repeats=30
+profile_complete backend=rocsolver calls=3

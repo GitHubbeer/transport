@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "configurations": 1,
+  "runs": 3,
+  "validated_runs": 3,
+  "paired_samples": 90,
+  "failed_logs": []
+}

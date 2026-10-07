@@ -1,0 +1,139 @@
+[
+  {
+    "label": "cdls-dense-20261006",
+    "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006-current",
+    "ROCm": "6.4.2",
+    "status": "FAIL",
+    "recorded_utc": "2026-10-07T10:16:16.391771+00:00",
+    "note": "可复用已通过配置的 dense 计时与同版本 trace；不是 audikw 实际输入；random n2048 三轮失败必须保留。",
+    "summary_rows": 116,
+    "validation_flags": {
+      "True": 115,
+      "False": 1
+    },
+    "copied": [
+      "metadata.json",
+      "verification.json",
+      "summary.csv",
+      "samples.csv",
+      "compiler.txt",
+      "ldd.txt",
+      "git-head.txt",
+      "git-diff.txt",
+      "commands.json",
+      "profile-summary.csv"
+    ],
+    "hashed_source_records": 537
+  },
+  {
+    "label": "cdls-random2048-retest",
+    "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261006T095710Z-n2048-retest",
+    "ROCm": "6.4.2",
+    "status": "PASS",
+    "recorded_utc": "2026-10-07T10:16:16.589181+00:00",
+    "note": "单独的稳定性补测；不能覆盖或替换原失败记录。",
+    "summary_rows": 1,
+    "validation_flags": {
+      "True": 1
+    },
+    "copied": [
+      "metadata.json",
+      "verification.json",
+      "summary.csv",
+      "samples.csv",
+      "compiler.txt",
+      "ldd.txt",
+      "git-head.txt",
+      "git-diff.txt",
+      "commands.json"
+    ],
+    "hashed_source_records": 34
+  },
+  {
+    "label": "hybrid-pilot",
+    "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261007-hybrid-ablation",
+    "ROCm": "6.4.2",
+    "status": "SUPERSEDED_PILOT",
+    "recorded_utc": "2026-10-07T10:16:16.836054+00:00",
+    "note": "SUPERSEDED_PILOT：范围较小的 ON/OFF 消融，仅探索性复用，不当作完整对齐评测。",
+    "summary_rows": 0,
+    "validation_flags": {},
+    "copied": [
+      "metadata.json",
+      "compiler.txt",
+      "ldd.txt",
+      "git-head.txt",
+      "git-diff.txt",
+      "commands.json"
+    ],
+    "hashed_source_records": 58
+  },
+  {
+    "label": "hybrid-aligned",
+    "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/profiling/getrf-mi300/results/20261007-hybrid-ablation-aligned",
+    "ROCm": "6.4.2",
+    "status": "RUNNING",
+    "recorded_utc": "2026-10-07T10:16:17.344127+00:00",
+    "note": "匹配原 116 配置的 ON/OFF 实验；库存核验时仍 RUNNING，不纳入本轮已完成结果。",
+    "summary_rows": 0,
+    "validation_flags": {},
+    "copied": [
+      "metadata.json",
+      "compiler.txt",
+      "ldd.txt",
+      "git-head.txt",
+      "git-diff.txt",
+      "commands.json"
+    ],
+    "hashed_source_records": 165
+  },
+  {
+    "label": "ck-dense-20261002",
+    "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/third_party/ck_getrf/docs/performance/20261002",
+    "ROCm": "6.4.2",
+    "status": "PASS",
+    "recorded_utc": "2026-10-07T10:16:17.436257+00:00",
+    "note": "旧 CK dense 曲线、原始 samples 与 source/binary hash，可单独作历史结果；不能与本轮 7.2.4 计数配对。",
+    "summary_rows": 72,
+    "validation_flags": {
+      "unspecified": 72
+    },
+    "copied": [
+      "EXPERIMENT.json",
+      "summary.csv",
+      "samples.csv"
+    ],
+    "hashed_source_records": 6
+  },
+  {
+    "label": "pastix-ck-20261002",
+    "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261002-ck-vs-rocsolver",
+    "ROCm": "7.2.4",
+    "status": "PASS",
+    "recorded_utc": "2026-10-07T10:16:18.209339+00:00",
+    "note": "稀疏全分解计时和固定二进制；可复用旧 rocSOLVER plugin 二进制身份，本轮未用其耗时推断 GETRF。",
+    "summary_rows": 0,
+    "validation_flags": {},
+    "copied": [
+      "manifest.json",
+      "samples.csv"
+    ],
+    "hashed_source_records": 213
+  },
+  {
+    "label": "pastix-cdls-20261006",
+    "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261006-cdls-update1-mi300a",
+    "ROCm": "7.2.4",
+    "status": "COMPLETE",
+    "recorded_utc": "2026-10-07T10:16:18.460000+00:00",
+    "note": "audikw repaired 输入、1D update1 的环境/资源/命令与 backend 身份可复用；没有逐 GETRF shape/trace，不能替代新采集。",
+    "summary_rows": 0,
+    "validation_flags": {},
+    "copied": [
+      "manifest.json",
+      "statistics.csv",
+      "samples.csv"
+    ],
+    "hashed_source_records": 69
+  }
+]

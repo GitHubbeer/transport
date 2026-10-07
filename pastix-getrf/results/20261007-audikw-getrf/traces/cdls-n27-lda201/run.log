@@ -1,0 +1,15 @@
+W20261007 05:12:42.873072 125211489213504 simple_timer.cpp:55] [rocprofv3] tool initialization ::     0.002451 sec
+W20261007 05:12:42.873290 125211489213504 tool.cpp:2422] HIP (compiler) version 7.2.0 initialized (instance=0)
+W20261007 05:12:42.897134 125211489213504 simple_timer.cpp:55] [rocprofv3] '/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/binaries/replay-profile /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/inputs/call137-n27-lda201.bin 27 201 cdls' ::     0.000000 sec
+W20261007 05:12:42.897288 125211489213504 tool.cpp:2422] MARKER (ROCTx) version 1.1.0 initialized (instance=0)
+W20261007 05:12:42.900834 125211489213504 tool.cpp:2422] HIP (runtime) version 7.2.0 initialized (instance=0)
+W20261007 05:12:43.031653 125211489213504 tool.cpp:2422] HSA version 8.20.4 initialized (instance=0)
+W20261007 05:12:43.198841 125211489213504 simple_timer.cpp:55] [rocprofv3] '/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/binaries/replay-profile /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/inputs/call137-n27-lda201.bin 27 201 cdls' ::     0.301708 sec
+E20261007 05:12:43.345142 125211489213504 output_stream.cpp:111] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/traces/cdls-n27-lda201/trace_kernel_trace.csv
+E20261007 05:12:43.486813 125211489213504 output_stream.cpp:111] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/traces/cdls-n27-lda201/trace_hip_api_trace.csv
+E20261007 05:12:43.653415 125211489213504 output_stream.cpp:111] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/traces/cdls-n27-lda201/trace_marker_api_trace.csv
+E20261007 05:12:43.659391 125211489213504 output_stream.cpp:111] Opened result file: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/traces/cdls-n27-lda201/trace_agent_info.csv
+W20261007 05:12:43.683199 125211489213504 simple_timer.cpp:55] [rocprofv3] output generation ::     0.478027 sec
+W20261007 05:12:43.683316 125211489213504 simple_timer.cpp:55] [rocprofv3] tool finalization ::     0.478206 sec
+device=AMD Instinct MI300A arch=gfx942:sramecc+:xnack- HIP=70253211 CUs=228 rocSOLVER=3.32.0.dabb6df2b9 rocBLAS=5.2.0.dabb6df2b9 n=27 lda=201 input=/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261007-audikw-getrf/inputs/call137-n27-lda201.bin stream_mode=nonblocking fp64 npvt warmup=5 repeats=30
+profile_complete backend=cdls calls=3

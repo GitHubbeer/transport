@@ -1,0 +1,47 @@
+[
+  {
+    "call_id": 137,
+    "n": 27,
+    "lda": 201,
+    "bytes": 43416,
+    "dtype": "float64",
+    "layout": "column-major",
+    "source": "after predecessor Schur updates and diagonal GEADD, before cdlsDgetrf",
+    "padding": "all original rows n..lda-1 preserved",
+    "cblk": 137,
+    "backend": "hip-hipmm-cdls-getrf",
+    "stream": "0x5eac86616030",
+    "sha256": "4cf17b148d8977f64361c866acac2683d795731b745b2af073bf811d2f68048f",
+    "filename": "call137-n27-lda201.bin"
+  },
+  {
+    "call_id": 9521,
+    "n": 189,
+    "lda": 837,
+    "bytes": 1265544,
+    "dtype": "float64",
+    "layout": "column-major",
+    "source": "after predecessor Schur updates and diagonal GEADD, before cdlsDgetrf",
+    "padding": "all original rows n..lda-1 preserved",
+    "cblk": 9521,
+    "backend": "hip-hipmm-cdls-getrf",
+    "stream": "0x5eac86616030",
+    "sha256": "d47dd9521235ee7f0d6207b85b363a5ed237fd9cbe2b2cf07c6aa99587206ae4",
+    "filename": "call9521-n189-lda837.bin"
+  },
+  {
+    "call_id": 10892,
+    "n": 351,
+    "lda": 1914,
+    "bytes": 5374512,
+    "dtype": "float64",
+    "layout": "column-major",
+    "source": "after predecessor Schur updates and diagonal GEADD, before cdlsDgetrf",
+    "padding": "all original rows n..lda-1 preserved",
+    "cblk": 10892,
+    "backend": "hip-hipmm-cdls-getrf",
+    "stream": "0x5eac86616030",
+    "sha256": "b1d133da1657fb88a1d4825deb0c93ad564fd8a0a85a891bd7685067aef3aed0",
+    "filename": "call10892-n351-lda1914.bin"
+  }
+]

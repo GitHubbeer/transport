@@ -1,0 +1,110 @@
+{
+  "start_utc": "2026-10-06T23:59:37.749582+00:00",
+  "status": "COMPLETE",
+  "hostname": "sh5-pl1-s12-33",
+  "slurm_job_id": "22556",
+  "backend": "hip-hipmm-cdls-getrf",
+  "layout": "1d",
+  "update": 1,
+  "threads": 2,
+  "cpu_affinity": [
+    0,
+    1
+  ],
+  "pool_bytes": 34359738368,
+  "repeats": 3,
+  "timeout": 1200,
+  "residual_limit": 1e-12,
+  "matrices": {
+    "CoupCons3D": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/CoupCons3D.mtx",
+      "sha256": "96cd6220f7b9d1cf2a03773346137b9a5e78b0a40e5041390502eaf9efc1f44f",
+      "size": 614804605,
+      "repaired_input": false
+    },
+    "dielFilterV3real": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/dielFilterV3real.mtx",
+      "sha256": "5f91260c95189ea55a02fe8b677ea77675ba069f5ee5fef488aaa6154bffe269",
+      "size": 1581474573,
+      "repaired_input": false
+    },
+    "inline_1": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/inline_1.mtx",
+      "sha256": "6179bf6aecb79f124a85afec6259664beb85c1bbfdc12923dba9e8c7fcdb62ea",
+      "size": 603544811,
+      "repaired_input": false
+    },
+    "audikw_1": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix-repaired/audikw_1.mtx",
+      "sha256": "b2239f90db6a9a5c74e7bc4c6e365876a85752c6a87830e7abcd05d646bd33bb",
+      "size": 1252770492,
+      "repaired_input": true
+    },
+    "nd6k": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/nd6k.mtx",
+      "sha256": "89fe586cdfb8a24897f69d64924cf7229f55dfa1dfeab4ec2d6c9d724c569821",
+      "size": 108651044,
+      "repaired_input": false
+    },
+    "xenon2": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/xenon2.mtx",
+      "sha256": "90355b03aa285a09e512cdc7b490911b56bea575adb8c29fabb2544e84b96e61",
+      "size": 133235297,
+      "repaired_input": false
+    },
+    "radiation": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/radiation.mtx",
+      "sha256": "4b02800f089c234027dd2734dc557b92781bdcd1678e653083e5c1ea7d4374dc",
+      "size": 167664622,
+      "repaired_input": false
+    },
+    "dgreen": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/dgreen.mtx",
+      "sha256": "6046b0fe01b644579fa8fb915427455524b72c82acc400a73d326fabd26ce0d8",
+      "size": 868452711,
+      "repaired_input": false
+    },
+    "pwtk": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/pwtk.mtx",
+      "sha256": "b96f7a0d851ddd65d6a833dcd13f32bad39a273018e00163b890500316f48dfa",
+      "size": 162185434,
+      "repaired_input": false
+    },
+    "cage12": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/cage12.mtx",
+      "sha256": "c2b12b85cfcbab5d4dd91a08b10015bac4d3b3b0589316b7b4b9058f50caec77",
+      "size": 61548649,
+      "repaired_input": false
+    }
+  },
+  "binaries": {
+    "solver": {
+      "source": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/build-mi300a-core/example/simple_solve_and_refine",
+      "sha256": "18e47f599d5e7282c7d222e53717666e9062b626f0999929b77e3eec684bab91"
+    },
+    "cdls.so": {
+      "source": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/build-mi300a-roc/libpastix_device_hip.so",
+      "sha256": "bbb219e912a947705248f64d863b14de1e111ca501a3af886b65c149559003ef"
+    },
+    "libcdls_rocm.so": {
+      "source": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/build-mi300a-roc/cdls/src/rocm/libcdls_rocm.so",
+      "sha256": "1017da36b6a9eefbe2f768bb92be69407e7ca2e39757782b599dc88313f521df"
+    }
+  },
+  "cdls_commit": "44067f1e654e5c4a593cc82c34cde4f4c48a62b2",
+  "pastix_commit": "3fc41f91d6a1a2906cd34ff6647ef9d1a9cbbb90",
+  "runner_sha256": "aae9e47cd50f83143fd567686eee7a0ab2b6d29ea13f99202d95e580ecdf26fb",
+  "environment": {
+    "LD_LIBRARY_PATH": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261006-cdls-update1-mi300a/binaries:/nfsapps/ubuntu-24.04/opt/rocmplus-7.2.4/openblas-v0.3.33/lib:/nfsapps/ubuntu-24.04/opt/rocm-7.2.4/lib:/shared/apps/ubuntu/rocmplus-7.2.1/pdt/linux-zen3/flux-core-0.67.0-xvfz4i26hiars5qevuc6ttptp5f5yovv/lib:/shared/apps/ubuntu/rocmplus-7.2.1/pdt/linux-zen3/flux-security-0.14.0-ytj3zfgtnebuqgju3fjcf7v7koih57at/lib:/shared/apps/ubuntu/rocmplus-7.2.1/pdt/linux-zen3/flux-sched-0.36.1-obmcaqbkek76wvencclxofnomktmsk3w/lib::/usr/local/julia-1.12.5/lib:/usr/local/julia-1.12.5/lib",
+    "PASTIX_DEVICE_BACKEND": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261006-cdls-update1-mi300a/binaries/cdls.so",
+    "PASTIX_DEVICE_POOL_BYTES": "34359738368",
+    "PASTIX_DEVICE_LAYOUT": "1d",
+    "PASTIX_GPU_UPDATE_STRATEGY": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "completed": 30,
+  "valid": 30,
+  "updated_utc": "2026-10-07T00:12:20.581833+00:00",
+  "end_utc": "2026-10-07T00:12:20.567189+00:00"
+}

@@ -1,0 +1,11 @@
+[  0%] Built target kernels_headers_tgt
+[  0%] Built target refinement_headers_tgt
+[  0%] Built target low_precision_headers_tgt
+[  0%] Built target bcsc_headers_tgt
+[  1%] Built target spm_headers_tgt
+[ 59%] Built target spm
+[ 66%] Built target pastix_kernels
+[ 98%] Built target pastix
+[100%] Building C object example/CMakeFiles/simple_solve_and_refine.dir/simple_solve_and_refine.c.o
+[100%] Linking CXX executable simple_solve_and_refine
+[100%] Built target simple_solve_and_refine

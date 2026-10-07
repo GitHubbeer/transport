@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "paired_samples": 270,
+  "timed_calls": 540,
+  "validation_records": 18,
+  "profiled_calls": 18,
+  "attributed_kernels": 339,
+  "all_kernels_correlated_to_unique_ROI": true,
+  "three_repeats_same_structure": true,
+  "distinct_cblks": 10898,
+  "sum_diagonal_columns": 943695,
+  "identical_workload_geometry_on_distribution_and_capture": true,
+  "device_versions": [
+    "device=AMD Instinct MI300A arch=gfx942:sramecc+:xnack- HIP=70253211 CUs=228 rocSOLVER=3.32.0.dabb6df2b9 rocBLAS=5.2.0.dabb6df2b9"
+  ]
+}

@@ -1,0 +1,29 @@
+JobId=22565 JobName=bash
+   UserId=yuxi_hong_research_lws(8414) GroupId=yuxi_hong_research_lws(8414) MCS_label=amd
+   Priority=1061 Nice=0 Account=amd QOS=normal
+   JobState=RUNNING Reason=None Dependency=(null)
+   Requeue=0 Restarts=0 BatchFlag=0 Reboot=0 ExitCode=0:0
+   RunTime=00:20:17 TimeLimit=08:00:00 TimeMin=N/A
+   SubmitTime=2026-10-07T04:51:44 EligibleTime=2026-10-07T04:51:44
+   AccrueTime=Unknown
+   StartTime=2026-10-07T04:51:44 EndTime=2026-10-07T12:51:44 Deadline=N/A
+   PreemptEligibleTime=2026-10-07T05:01:44 PreemptTime=None
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-07T04:51:44 Scheduler=Main
+   Partition=PPAC_MI300A_SPX AllocNode:Sid=aac6-fe1:4149974
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=ppac-pl1-s24-16
+   BatchHost=ppac-pl1-s24-16
+   NumNodes=1 NumCPUs=48 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=2400M,node=1,billing=1,gres/gpu=1
+   AllocTRES=cpu=48,mem=112.50G,node=1,billing=48,gres/gpu=1
+   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*
+   MinCPUsNode=1 MinMemoryCPU=2400M MinTmpDiskNode=0
+   Features=(null) DelayBoot=00:00:00
+   OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)
+   Command=bash
+   WorkDir=/shared/prerelease/home/yuxi_hong_research_lws
+   Power=
+   CpusPerTres=gpu:48
+   TresPerNode=gres/gpu:1
+   
+

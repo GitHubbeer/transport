@@ -1,0 +1,204 @@
+{
+  "start_utc": "2026-10-02T09:38:32.541758+00:00",
+  "status": "PASS",
+  "hostname": "ppac-pl1-s24-16",
+  "cpu_affinity": [
+    0,
+    96
+  ],
+  "slurm_job": "22329",
+  "trials": 3,
+  "timeout": 600,
+  "threads": 2,
+  "pool_bytes": 34359738368,
+  "cases": [
+    {
+      "matrix": "cage12",
+      "case": "1d_update2",
+      "layout": "1d",
+      "update": 2,
+      "primary": true,
+      "historical_rocsolver_s": 2.49061
+    },
+    {
+      "matrix": "cage12",
+      "case": "1d_update0",
+      "layout": "1d",
+      "update": 0,
+      "primary": false,
+      "historical_rocsolver_s": 2.948732
+    },
+    {
+      "matrix": "cage12",
+      "case": "1d_update1",
+      "layout": "1d",
+      "update": 1,
+      "primary": false,
+      "historical_rocsolver_s": 2.49771
+    },
+    {
+      "matrix": "cage12",
+      "case": "1d_update3",
+      "layout": "1d",
+      "update": 3,
+      "primary": false,
+      "historical_rocsolver_s": 2.938511
+    },
+    {
+      "matrix": "cage12",
+      "case": "2d",
+      "layout": "2d",
+      "update": 0,
+      "primary": false,
+      "historical_rocsolver_s": 29.35274
+    },
+    {
+      "matrix": "nd24k",
+      "case": "1d_update1",
+      "layout": "1d",
+      "update": 1,
+      "primary": true,
+      "historical_rocsolver_s": 1.192158
+    },
+    {
+      "matrix": "nd24k",
+      "case": "1d_update0",
+      "layout": "1d",
+      "update": 0,
+      "primary": false,
+      "historical_rocsolver_s": 1.777532
+    },
+    {
+      "matrix": "nd24k",
+      "case": "1d_update2",
+      "layout": "1d",
+      "update": 2,
+      "primary": false,
+      "historical_rocsolver_s": 1.232455
+    },
+    {
+      "matrix": "nd24k",
+      "case": "1d_update3",
+      "layout": "1d",
+      "update": 3,
+      "primary": false,
+      "historical_rocsolver_s": 1.764474
+    },
+    {
+      "matrix": "nd24k",
+      "case": "2d",
+      "layout": "2d",
+      "update": 0,
+      "primary": false,
+      "historical_rocsolver_s": 3.613442
+    },
+    {
+      "matrix": "SiO2",
+      "case": "1d_update1",
+      "layout": "1d",
+      "update": 1,
+      "primary": true,
+      "historical_rocsolver_s": 3.635235
+    },
+    {
+      "matrix": "Si87H76",
+      "case": "1d_update2",
+      "layout": "1d",
+      "update": 2,
+      "primary": true,
+      "historical_rocsolver_s": 9.06117
+    },
+    {
+      "matrix": "CoupCons3D",
+      "case": "1d_update3",
+      "layout": "1d",
+      "update": 3,
+      "primary": true,
+      "historical_rocsolver_s": 3.937487
+    },
+    {
+      "matrix": "Hook_1498",
+      "case": "1d_update1",
+      "layout": "1d",
+      "update": 1,
+      "primary": true,
+      "historical_rocsolver_s": 18.75392
+    },
+    {
+      "matrix": "ldoor",
+      "case": "1d_update3",
+      "layout": "1d",
+      "update": 3,
+      "primary": true,
+      "historical_rocsolver_s": 11.99692
+    },
+    {
+      "matrix": "xenon2",
+      "case": "1d_update3",
+      "layout": "1d",
+      "update": 3,
+      "primary": true,
+      "historical_rocsolver_s": 2.454081
+    },
+    {
+      "matrix": "G3_circuit",
+      "case": "1d_update3",
+      "layout": "1d",
+      "update": 3,
+      "primary": true,
+      "historical_rocsolver_s": 144.5776
+    }
+  ],
+  "runner_sha256": "8ac216a3cb3cee4025ce928c47027bb2a73e5d5439f23097389fd52ca1f8c172",
+  "executable_sha256": "37c43aae3e80179b6ed9a2cd5b8fea2ed70b72caaf92f7d6f310866f7309606c",
+  "plugin_sha256": {
+    "rocsolver": "24434501475ab42a080d7c31fe1a833a71988ac751272f5ac586446182214568",
+    "ck": "dc0d3a0aa60c68192d7f4a65247dfa6488b182360a530fa40e885e09c08eb9ce"
+  },
+  "matrices": {
+    "cage12": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/cage12.mtx",
+      "sha256": "c2b12b85cfcbab5d4dd91a08b10015bac4d3b3b0589316b7b4b9058f50caec77"
+    },
+    "nd24k": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/nd24k.mtx",
+      "sha256": "bc27a2c946f94af8983f273220c5a61ecd623caaf36071e2fabf6faf8c35e625"
+    },
+    "SiO2": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/SiO2.mtx",
+      "sha256": "5aeb3ad1bd2cc0b84f8ebde2ffe9a5792c2720d344b02c854e9fe65defaf17fd"
+    },
+    "Si87H76": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/Si87H76.mtx",
+      "sha256": "533075ea9bedd25f7427733f431741fc830a9f8bfe0abbe1c1a8ac0f1cb95cef"
+    },
+    "CoupCons3D": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/CoupCons3D.mtx",
+      "sha256": "96cd6220f7b9d1cf2a03773346137b9a5e78b0a40e5041390502eaf9efc1f44f"
+    },
+    "Hook_1498": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/Hook_1498.mtx",
+      "sha256": "ca03a3ddcb6a2732ab8774f55c6328333714c79233c6511269a4213d81657fd5"
+    },
+    "ldoor": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/ldoor.mtx",
+      "sha256": "be4de4434c508038652ff7401cf5413cfbda3e4f3476928ab2831655cb0f2969"
+    },
+    "xenon2": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/xenon2.mtx",
+      "sha256": "90355b03aa285a09e512cdc7b490911b56bea575adb8c29fabb2544e84b96e61"
+    },
+    "G3_circuit": {
+      "path": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/G3_circuit.mtx",
+      "sha256": "ccaf9972ebe3f24731cec7295f281bdca59f31cb084663ef1011f0194a26a101"
+    }
+  },
+  "core_commit": "af81bf61ca9def934b209879a8a60f1d7a907515",
+  "ck_commit": "29d3ba1b67b390a43e16f963bdd87dcfe2ca4769",
+  "environment": {
+    "ROCR_VISIBLE_DEVICES": "0",
+    "LD_LIBRARY_PATH": "/nfsapps/ubuntu-24.04/opt/rocm-7.2.4/lib:/nfsapps/ubuntu-24.04/opt/rocm-7.2.4/llvm/lib:/nfsapps/ubuntu-24.04/opt/rocmplus-7.2.4/openblas-v0.3.33/lib:/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/deps/metis/lib",
+    "SLURM_JOB_PARTITION": "PPAC_MI300A_SPX"
+  },
+  "end_utc": "2026-10-02T10:36:27.720761+00:00"
+}

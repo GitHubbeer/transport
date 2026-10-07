@@ -1,0 +1,69 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 97b79b1..8a09f9a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,6 +12,7 @@ endif ()
+ option(CDLS_ENABLE_EXAMPLES "Enable examples" ON)
+ option(CDLS_ENABLE_OSDI26 "Enable visualization in OSDI '26 paper" OFF)
+ option(CDLS_ENABLE_TESTS "Enable GETRF scheduling and numerical tests" OFF)
++option(CDLS_GETRF_ENABLE_HYBRID "Use BLAS trailing updates for large no-pivot GETRF (OFF for fused-only ablation)" ON)
+ 
+ set(_DISABLE_INSTALLATION ON)
+ 
+@@ -64,6 +65,13 @@ if (HAVE_ROCM_COMPILER)
+     add_subdirectory(src/rocm)
+ endif ()
+ 
++foreach(_getrf_backend cdls_cuda cdls_rocm)
++    if(TARGET ${_getrf_backend})
++        target_compile_definitions(${_getrf_backend} PRIVATE
++            CDLS_GETRF_ENABLE_HYBRID=$<BOOL:${CDLS_GETRF_ENABLE_HYBRID}>)
++    endif()
++endforeach()
++
+ if (CDLS_ENABLE_TESTS)
+     enable_testing()
+     add_subdirectory(tests)
+diff --git a/README.md b/README.md
+index 144eab8..465d403 100644
+--- a/README.md
++++ b/README.md
+@@ -43,6 +43,12 @@ ctest --test-dir build/getrf --output-on-failure
+ ```
+ 
+ Add `-DCDLS_CK_SOURCE_DIR=/path/to/composable_kernel` to use an existing checkout.
++`CDLS_GETRF_ENABLE_HYBRID` defaults to `ON`. Configure a separate build with
++`-DCDLS_GETRF_ENABLE_HYBRID=OFF` for a no-pivot GETRF ablation: large matrices
++use the existing full fused tiled path instead of outer panels and BLAS
++trailing updates. Small-size dispatch, public API, workspace and static-pivot
++behavior are preserved. The option applies to both CUDA and ROCm; MI300
++measurement instructions are in `profiling/getrf-mi300/HYBRID_ABLATION.md`.
+ For CUDA, configure with the CUDA toolkit and `CMAKE_CUDA_ARCHITECTURES=80`
+ or a supported newer architecture. `CDLS_ENABLE_TESTS` builds the same GPU
+ numerical test for each available backend, plus a portable task-order test.
+diff --git a/src/cuda/getrf.cu b/src/cuda/getrf.cu
+index 0e84659..9a4f0b5 100644
+--- a/src/cuda/getrf.cu
++++ b/src/cuda/getrf.cu
+@@ -34,7 +34,7 @@ cdlsStatus_t getrf_no_pivot(cdlsHandle_t handle, long n, double* matrix,
+     return Fused::call(n, matrix, lda, workspace, pivot_count, 0.0, stream, 0);
+ 
+   // cuBLAS takes int dimensions; the tiled kernel retains 64-bit addressing.
+-  if (n > INT_MAX || lda > INT_MAX)
++  if (!CDLS_GETRF_ENABLE_HYBRID || n > INT_MAX || lda > INT_MAX)
+     return Prefix::call(n, matrix, lda, workspace, pivot_count, 0.0, stream, 0);
+ 
+   auto blas = reinterpret_cast<CudaHandle*>(handle)->blas;
+diff --git a/src/rocm/getrf.cpp b/src/rocm/getrf.cpp
+index c42dfbd..abaf0ab 100644
+--- a/src/rocm/getrf.cpp
++++ b/src/rocm/getrf.cpp
+@@ -40,7 +40,7 @@ cdlsStatus_t factorize_no_pivot(cdlsHandle_t handle, int n, double* matrix,
+   if (hipMemsetAsync(info, 0, sizeof(int), stream) != hipSuccess)
+     return CDLS_STATUS_EXECUTION_FAILED;
+   // CK production policy: 512-wide outer panels, fused tail <= 4096.
+-  if (n <= 4096 || lda > INT_MAX)
++  if (!CDLS_GETRF_ENABLE_HYBRID || n <= 4096 || lda > INT_MAX)
+     return launch_prefix(n, n, matrix, lda, info, workspace, stream, 0) ==
+                    hipSuccess
+                ? CDLS_STATUS_SUCCESS

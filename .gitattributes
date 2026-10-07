@@ -1,3 +1,4 @@
 # Keep archived measurements and snapshots byte-for-byte, including original line endings.
 getrf-mi300/results/** -text -whitespace
 pastix-cdls/results/** -text -whitespace
+pastix-getrf/results/** -text -whitespace

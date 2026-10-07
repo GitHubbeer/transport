@@ -1,0 +1,1 @@
+{"call_id":9521,"n":189,"lda":837,"bytes":1265544,"dtype":"float64","layout":"column-major","source":"after predecessor Schur updates and diagonal GEADD, before cdlsDgetrf","padding":"all original rows n..lda-1 preserved"}

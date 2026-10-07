@@ -1,0 +1,239 @@
+{
+  "status": "SUPERSEDED_PILOT",
+  "start_utc": "2026-10-07T09:50:41.463989+00:00",
+  "hostname": "sh5-pl1-s12-33",
+  "cases": [
+    {
+      "name": "n2048",
+      "n": 2048,
+      "lda": 2048,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n4096",
+      "n": 4096,
+      "lda": 4096,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n4097",
+      "n": 4097,
+      "lda": 4097,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n5120",
+      "n": 5120,
+      "lda": 5120,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n6144",
+      "n": 6144,
+      "lda": 6144,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n8192",
+      "n": 8192,
+      "lda": 8192,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n10240",
+      "n": 10240,
+      "lda": 10240,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n12288",
+      "n": 12288,
+      "lda": 12288,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n16384",
+      "n": 16384,
+      "lda": 16384,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n24576",
+      "n": 24576,
+      "lda": 24576,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n32768",
+      "n": 32768,
+      "lda": 32768,
+      "offset": 0,
+      "phase": "size"
+    },
+    {
+      "name": "n8192-pad17-off1",
+      "n": 8192,
+      "lda": 8209,
+      "offset": 1,
+      "phase": "layout"
+    },
+    {
+      "name": "n16384-pad128",
+      "n": 16384,
+      "lda": 16512,
+      "offset": 0,
+      "phase": "layout"
+    }
+  ],
+  "trials": 3,
+  "repeats": 30,
+  "warmup": 5,
+  "arguments": {
+    "output": "profiling/getrf-mi300/results/20261007-hybrid-ablation",
+    "binary": "build/cdls-getrf-ablation-bench",
+    "hybrid_build": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/build/getrf-hybrid-ablation",
+    "nohybrid_build": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/build/getrf-nohybrid",
+    "sizes": [
+      2048,
+      4096,
+      4097,
+      5120,
+      6144,
+      8192,
+      10240,
+      12288,
+      16384,
+      24576,
+      32768
+    ],
+    "trials": 3,
+    "repeats": 30,
+    "warmup": 5,
+    "no_layout": false,
+    "plan_only": false,
+    "plot_only": false
+  },
+  "source_sha256": {
+    "CMakeLists.txt": "10738a505d4f50adab1fa3e093587d5e8c3a60d12ae0d6bb32640983b2673494",
+    "include/cdls/common.h": "08197381e5bf39b7470c41daeb3a7acf80a86fe60f91f476c809f9526a9dfb22",
+    "include/cdls/getrf.h": "42f782042a1e7e516b4339ebc9485830f7013630475f020192fe56b224e951e8",
+    "include/cdls/internal/common.h": "1e1f8d69d5189a049348e732e87d0e01fd96e37e6e3c4d4f1d6e27f59394e975",
+    "profiling/getrf-mi300/ablate_hybrid.py": "cd880507a74ea528c5b4156be1929a3d2286ca5da56406501deefdd995c22587",
+    "profiling/getrf-mi300/benchmark.cpp": "1b6960c1d482db5e1d4aaff82da980e7d324b8bb3aa566110a3ea2a61413b5b8",
+    "src/common/getrf/hybrid.h": "699ed4fef28569b4815221470900e98b2b207d3aa25e8bd0a9a2353e0f582575",
+    "src/common/getrf/numeric.h": "c86b1b1c88cd506abae35e124bdc790812481ff46e3703521c5af16e5ac8d32d",
+    "src/common/getrf/panel.h": "bf7b1e1cc55c9c0ffbd265e9a8015e6be166c58bd9b26f2dec5bc556e5b50ee2",
+    "src/common/getrf/portability.h": "acc8c112d52006641e4fc2d057a79686502390a2bb9ffb4a27268061bbe9fb19",
+    "src/common/getrf/schedule.h": "6ec3f2adb25ef01aaa2cc3e733981a9486c959ca17320c9f53bc796d35a39ce9",
+    "src/common/getrf/static_pivot.h": "ac42c4baf52f21f6d2458f70a85e7ef15a0bc8db4318bb011cfae029e3926319",
+    "src/common/getrf/triangular.h": "3f9d983953964d5c77fa9fc7a5b3e4a69851981d11892392c2165ddf03409507",
+    "src/rocm/CMakeLists.txt": "6f6d1f9b7d14f0afaa675e5a7c850c34d1b75e3c6408d9a6994616691a5d317b",
+    "src/rocm/common.cpp": "419778c4bc8c8d15d68b9e10cb3aa085933194cc5453b62b207b67ee8f98f3ca",
+    "src/rocm/getrf/config.h": "3f13a941da5403cf8c9195499f0dc68b3e8024e247d4331de22664890ae3d678",
+    "src/rocm/getrf/static_pivot.h": "85c86686448c940d69288e7eff9b1a6a29496ef1baed03a298c6ae20ad941889",
+    "src/rocm/getrf/tiled.h": "ef9444f38916aa4ba5b7477cb447a3bc67e5e22c7552507233f25b92e2b6fcda",
+    "src/rocm/getrf.cpp": "73710cec40be4c96fafa87b3ef7e4f821aa045b304adebb7548516326d99cc24",
+    "src/rocm/handle.h": "ccf6dde55c72c65fc16aa02a8a64cdd45b73e775997684cebf83ba845e7e4a35"
+  },
+  "binary_sha256": "d8b6103b9b50638a593192ccb587772fc450533e04f75aa7b9904752b695871d",
+  "library_sha256": {
+    "hybrid": "1d6a88ca61b06e961615397164fedb3f2757224d4cb8ad29d5f8c20162f2fc4a",
+    "nohybrid": "f329cfa7a92f8af97018aad4af144165f9f3c4a45a35381556c3cffb9f4ef674"
+  },
+  "build_settings": {
+    "hybrid": {
+      "CDLS_CK_SOURCE_DIR": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/ck_getrf/.deps/composable_kernel",
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_HIP_ARCHITECTURES": "gfx942",
+      "CMAKE_HIP_COMPILER": "/nfsapps/ubuntu-24.04/opt/rocm-6.4.2/llvm/bin/clang++",
+      "CMAKE_HIP_FLAGS": "",
+      "CMAKE_HIP_FLAGS_DEBUG": "-g -O",
+      "CMAKE_HIP_FLAGS_MINSIZEREL": "-Os -DNDEBUG",
+      "CMAKE_HIP_FLAGS_RELEASE": "-O3 -DNDEBUG",
+      "CMAKE_HIP_FLAGS_RELWITHDEBINFO": "-O2 -g -DNDEBUG"
+    },
+    "nohybrid": {
+      "CDLS_CK_SOURCE_DIR": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/ck_getrf/.deps/composable_kernel",
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_HIP_ARCHITECTURES": "gfx942",
+      "CMAKE_HIP_COMPILER": "/nfsapps/ubuntu-24.04/opt/rocm-6.4.2/llvm/bin/clang++",
+      "CMAKE_HIP_FLAGS": "",
+      "CMAKE_HIP_FLAGS_DEBUG": "-g -O",
+      "CMAKE_HIP_FLAGS_MINSIZEREL": "-Os -DNDEBUG",
+      "CMAKE_HIP_FLAGS_RELEASE": "-O3 -DNDEBUG",
+      "CMAKE_HIP_FLAGS_RELWITHDEBINFO": "-O2 -g -DNDEBUG"
+    }
+  },
+  "environment": {
+    "LD_LIBRARY_PATH": "/nfsapps/ubuntu-24.04/opt/rocm-6.4.2/lib",
+    "ROCM_PATH": "/nfsapps/ubuntu-24.04/opt/rocm-6.4.2",
+    "SLURM_STEP_NUM_TASKS": "1",
+    "SLURM_JOB_USER": "yuxi_hong_research_lws",
+    "SLURM_TASKS_PER_NODE": "1",
+    "SLURM_JOB_UID": "8414",
+    "SLURM_STEP_GPUS": "0",
+    "SLURM_CPU_BIND": "quiet,mask_cpu:0xFFFFFFFFFFFF",
+    "SLURM_TASK_PID": "462184",
+    "SLURM_LOCALID": "0",
+    "SLURM_SUBMIT_DIR": "/shared/prerelease/home/yuxi_hong_research_lws",
+    "SLURM_CPU_BIND_VERBOSE": "quiet",
+    "SLURM_JOB_START_TIME": "1791365892",
+    "SLURM_STEP_NODELIST": "sh5-pl1-s12-33",
+    "SLURM_CLUSTER_NAME": "prerelease01",
+    "SLURM_JOB_END_TIME": "1791394692",
+    "SLURM_CPUS_ON_NODE": "48",
+    "SLURM_UMASK": "0002",
+    "SLURM_JOB_CPUS_PER_NODE": "48",
+    "SLURM_GPUS_ON_NODE": "1",
+    "SLURM_GTIDS": "0",
+    "SLURM_JOB_PARTITION": "SH5_MI300A_SPX",
+    "ROCR_VISIBLE_DEVICES": "0",
+    "SLURM_JOB_NUM_NODES": "1",
+    "SLURM_STEPID": "0",
+    "SLURM_CPU_BIND_LIST": "0xFFFFFFFFFFFF",
+    "SLURM_JOBID": "22564",
+    "SLURM_PTY_PORT": "62109",
+    "SLURM_JOB_QOS": "normal",
+    "SLURM_LAUNCH_NODE_IPADDR": "10.194.42.31",
+    "SLURM_PTY_WIN_ROW": "56",
+    "SLURM_CPU_BIND_TYPE": "mask_cpu:",
+    "SLURM_PROCID": "0",
+    "SLURM_NTASKS": "1",
+    "SLURM_TOPOLOGY_ADDR": "sh5-pl1-s12-33",
+    "SLURM_TOPOLOGY_ADDR_PATTERN": "node",
+    "SLURM_SRUN_COMM_HOST": "10.194.42.31",
+    "SLURM_SCRIPT_CONTEXT": "prolog_task",
+    "SLURM_PTY_WIN_COL": "131",
+    "SLURM_NODELIST": "sh5-pl1-s12-33",
+    "SLURM_SRUN_COMM_PORT": "62110",
+    "SLURM_STEP_ID": "0",
+    "SLURM_JOB_ACCOUNT": "amd",
+    "SLURM_PRIO_PROCESS": "0",
+    "SLURM_NPROCS": "1",
+    "SLURM_NNODES": "1",
+    "SLURM_SUBMIT_HOST": "aac6-fe1",
+    "SLURM_JOB_ID": "22564",
+    "SLURM_NODEID": "0",
+    "SLURM_STEP_NUM_NODES": "1",
+    "SLURM_STEP_TASKS_PER_NODE": "1",
+    "SLURM_CONF": "/var/spool/slurm-llnl/conf-cache/slurm.conf",
+    "SLURM_JOB_NAME": "bash",
+    "SLURM_JOB_GROUP": "yuxi_hong_research_lws",
+    "SLURM_STEP_LAUNCHER_PORT": "62110",
+    "SLURM_JOB_GID": "8414",
+    "SLURM_JOB_NODELIST": "sh5-pl1-s12-33"
+  },
+  "end_utc": "2026-10-07T09:58:20.266292+00:00",
+  "execution_complete": false,
+  "reason": "User requested exact sizes and inputs from previous full assessment; replaced by 20261007-hybrid-ablation-aligned"
+}

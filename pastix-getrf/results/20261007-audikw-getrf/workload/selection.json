@@ -1,0 +1,33 @@
+{
+  "rule": "Join exact calls and select sizes before measuring either backend.\n\nRules: modal (n,lda); closest observed pair to midpoint of modal/max n;\nmaximum n. Within a tied n choose the most frequent lda, then smallest lda.\nThese three exact pairs are the direct coverage, not the whole size interval.\n",
+  "total_calls": 10898,
+  "unique_pairs": 5385,
+  "selected": [
+    {
+      "role": "high_frequency",
+      "n": 27,
+      "lda": 201,
+      "count": 44,
+      "call_fraction": 0.00403743806202973,
+      "first_call_id": 137
+    },
+    {
+      "role": "medium",
+      "n": 189,
+      "lda": 837,
+      "count": 1,
+      "call_fraction": 9.175995595522114e-05,
+      "first_call_id": 9521
+    },
+    {
+      "role": "large",
+      "n": 351,
+      "lda": 1914,
+      "count": 1,
+      "call_fraction": 9.175995595522114e-05,
+      "first_call_id": 10892
+    }
+  ],
+  "exact_pair_coverage": 0.0042209579739401724,
+  "unweighted_call_coverage_only": true
+}

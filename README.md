@@ -15,6 +15,15 @@
 | [完整测试](getrf-mi300/results/20261006-current/REPORT.md) | 116 组配置、348 次运行、9,240 对样本 | 345 次通过；任意随机输入 n=2048 的 3 次运行失败 |
 | [n=2048 重测](getrf-mi300/results/20261006T095710Z-n2048-retest/REPORT.md) | 对角占优输入、3 轮、90 对样本 | 全部通过 |
 | [PaStiX CDLS + 1D update1](pastix-cdls/results/20261006-cdls-update1-mi300a/README.md) | 10 个稀疏矩阵，每个 3 次独立运行 | 30/30 残差通过且 refinement=0；其中 21 次前向误差检查未通过，按指定条件纳入 |
+| [audikw_1 实际 GETRF 执行粒度](pastix-getrf/README.md) | 10,898 次对角调用分布；3 个真实输入、270 对计时、18 次完整调用 trace | 18 份 GETRF 验证通过；完整 solver 的严格前向误差检查失败、退出 255，原样保留 |
+
+新增 audikw_1 执行粒度批次使用 ROCm 7.2.4、rocSOLVER 3.32.0、rocBLAS 5.2.0，
+固定普通 1D、update1 无预取。真实 `(n,lda)=(189,837)` 和 `(351,1914)` 的完整调用
+kernel 数分别由 rocSOLVER 的 36/66 降至 CDLS 的 4/4；无 profiler 中位延迟分别快
+1.917×/1.862×。`(27,201)` 两者都只有一个计算 kernel，CDLS 减少了独立 info 初始化。
+三个精确 pair 覆盖 0.4221% 调用；不据此外推全分解覆盖或将全部收益归因于 launch overhead。
+本批次取每后端 90 个样本的总体中位数，并保留逐 trial 统计及全部原始样本。
+旧 ROCm 6.4.2 dense 数据和 hybrid 历史库存独立归档。
 
 n=2048 重测的 CDLS 中位延迟为 **1.716088 ms**，rocSOLVER 无 pivot 路径为
 **4.269848 ms**，加速比 **2.488×**。与上次 CDLS 1.722758 ms 的结果基本一致。
@@ -30,6 +39,7 @@ n=2048 重测的 CDLS 中位延迟为 **1.716088 ms**，rocSOLVER 无 pivot 路�
 - `getrf-mi300/`：benchmark、测试计划、分析、绘图、压力测试及 trace 脚本。
 - `getrf-mi300/results/`：原始日志、CSV 样本与汇总、数值验证、环境和命令、报告及性能图。
 - `pastix-cdls/results/`：PaStiX 数值分解性能，包含逐次样本、汇总、原始日志、环境、固定二进制和 CDLS ROCm 源码快照。
+- `pastix-getrf/results/`：audikw_1 实际对角 GETRF 的完整频数、真实输入、逐 kernel 归属、无 profiler 计时、环境与源码快照，以及完整归档包。
 - 每个结果目录中的 `source/`、`benchmark`、`libcdls_rocm.so`：测试时的源码快照与二进制。
 - `MANIFEST.json`：文件 SHA-256 校验值；完整测试沿用原始清单，2048 重测补充归档清单。
 - `licenses/ck_getrf_notices/`：CK、rocBLAS、rocSOLVER 的上游许可和来源说明。

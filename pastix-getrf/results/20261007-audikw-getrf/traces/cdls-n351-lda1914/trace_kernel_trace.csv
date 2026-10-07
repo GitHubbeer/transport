@@ -1,0 +1,13 @@
+"Kind","Agent_Id","Queue_Id","Stream_Id","Thread_Id","Dispatch_Id","Kernel_Id","Kernel_Name","Correlation_Id","Start_Timestamp","End_Timestamp","LDS_Block_Size","Scratch_Size","VGPR_Count","Accum_VGPR_Count","SGPR_Count","Workgroup_Size_X","Workgroup_Size_Y","Workgroup_Size_Z","Grid_Size_X","Grid_Size_Y","Grid_Size_Z"
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,1,10,"__amd_rocclr_fillBufferAligned",23579,608225111303048,608225111304768,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,2,10,"__amd_rocclr_fillBufferAligned",23580,608225111312328,608225111314248,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,3,10,"__amd_rocclr_fillBufferAligned",23580,608225111315768,608225111317168,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,4,14,"void cdls::rocm_detail::getrf::(anonymous namespace)::getrf_kernel<512, true, false, false>(int, double*, long, int, int, int*, int*, int*, int, int*, double)",23583,608225111321310,608225111576831,50176,0,64,112,112,512,1,1,18432,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,5,10,"__amd_rocclr_fillBufferAligned",23589,608225111621681,608225111623321,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,6,10,"__amd_rocclr_fillBufferAligned",23590,608225111626321,608225111628041,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,7,10,"__amd_rocclr_fillBufferAligned",23590,608225111630931,608225111632851,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,8,14,"void cdls::rocm_detail::getrf::(anonymous namespace)::getrf_kernel<512, true, false, false>(int, double*, long, int, int, int*, int*, int*, int, int*, double)",23593,608225111635863,608225111886384,50176,0,64,112,112,512,1,1,18432,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,9,10,"__amd_rocclr_fillBufferAligned",23599,608225111921804,608225111923524,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,10,10,"__amd_rocclr_fillBufferAligned",23600,608225111926194,608225111928114,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,11,10,"__amd_rocclr_fillBufferAligned",23600,608225111931214,608225111932174,0,0,12,4,48,256,1,1,256,1,1
+"KERNEL_DISPATCH","Agent 4",1,1,2777528,12,14,"void cdls::rocm_detail::getrf::(anonymous namespace)::getrf_kernel<512, true, false, false>(int, double*, long, int, int, int*, int*, int*, int, int*, double)",23603,608225111937675,608225112187996,50176,0,64,112,112,512,1,1,18432,1,1

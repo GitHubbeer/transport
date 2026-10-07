@@ -1,0 +1,540 @@
+CMake Deprecation Warning at CMakeLists.txt:24 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Submodule update
+Submodule 'third_party/cutlass' (https://github.com/NVIDIA/cutlass.git) registered for path 'third_party/cdls/third_party/cutlass'
+Submodule 'third_party/cxxopts' (https://github.com/jarro2783/cxxopts.git) registered for path 'third_party/cdls/third_party/cxxopts'
+Submodule 'third_party/rocWMMA' (https://github.com/ROCm/rocWMMA.git) registered for path 'third_party/cdls/third_party/rocWMMA'
+Cloning into '/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/third_party/cdls/third_party/cutlass'...
+Cloning into '/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/third_party/cdls/third_party/cxxopts'...
+Cloning into '/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/third_party/cdls/third_party/rocWMMA'...
+Submodule path 'third_party/cdls/third_party/cutlass': checked out '76c96b0be35cb263debe3e3d8418b80911a544ab'
+Submodule path 'third_party/cdls/third_party/cxxopts': checked out '80cb4520f71df447e0a9ec626c03d578c38b435e'
+Submodule path 'third_party/cdls/third_party/rocWMMA': checked out '27a847f610bfdb4e58dd257889734168b0ef8626'
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/FindMorseCommon.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:34 (include)
+  cmake_modules/morse_cmake/modules/MorseInit.cmake:66 (include)
+  CMakeLists.txt:84 (include)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/LibrariesAbsolutePath.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:40 (include)
+  cmake_modules/morse_cmake/modules/MorseInit.cmake:66 (include)
+  CMakeLists.txt:84 (include)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/Sanitizer.cmake:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/MorseInit.cmake:70 (include)
+  CMakeLists.txt:84 (include)
+
+
+CMake Deprecation Warning at cmake_modules/CheckSystem.cmake:2 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  CMakeLists.txt:90 (include)
+
+
+-- Building for target x86_64
+-- Found target X86_64
+CMAKE_Fortran_COMPILER full path: /nfsapps/ubuntu-24.04/opt/rocm-7.2.4/llvm/bin/amdflang
+Fortran compiler: amdflang
+No optimized Fortran compiler flags are known, we just try -O2...
+CMake Deprecation Warning at cmake_modules/CheckSubnormals.cmake:2 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  CMakeLists.txt:91 (include)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/FindMorseCommon.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:34 (include)
+  cmake_modules/morse_cmake/modules/find/FindCBLAS.cmake:83 (include)
+  CMakeLists.txt:259 (find_package)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/LibrariesAbsolutePath.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:40 (include)
+  cmake_modules/morse_cmake/modules/find/FindCBLAS.cmake:83 (include)
+  CMakeLists.txt:259 (find_package)
+
+
+-- Looking for Fortran openblas_set_num_threads
+-- Looking for Fortran openblas_set_num_threads - found
+-- CBLAS_BLAS BLAS
+-- Looking for cblas_dscal
+-- Looking for cblas_dscal - found
+-- Looking for cblas_zgemm3m
+-- Looking for cblas_zgemm3m - found
+-- Looking for cblas_cgemm3m
+-- Looking for cblas_cgemm3m - found
+-- CBLAS_WORKS 1
+-- Looking for cblas: test with blas succeeded
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/FindMorseCommon.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:34 (include)
+  cmake_modules/morse_cmake/modules/find/FindLAPACKE.cmake:78 (include)
+  CMakeLists.txt:267 (find_package)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/LibrariesAbsolutePath.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:40 (include)
+  cmake_modules/morse_cmake/modules/find/FindLAPACKE.cmake:78 (include)
+  CMakeLists.txt:267 (find_package)
+
+
+-- Looking for LAPACKE_dgeqrf
+-- Looking for LAPACKE_dgeqrf - found
+-- Looking for LAPACKE_dlascl_work
+-- Looking for LAPACKE_dlascl_work - found
+-- Looking for lapacke: test with lapack succeeded
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/FindMorseCommon.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:34 (include)
+  cmake_modules/morse_cmake/modules/find/FindHWLOC.cmake:54 (include)
+  CMakeLists.txt:273 (find_package)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/LibrariesAbsolutePath.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:40 (include)
+  cmake_modules/morse_cmake/modules/find/FindHWLOC.cmake:54 (include)
+  CMakeLists.txt:273 (find_package)
+
+
+-- FindHWLOC needs pkg-config program and PKG_CONFIG_PATH set HWLOC.pc file path.
+-- Checking for one of the modules 'hwloc'
+-- Looking for HWLOC - found using PkgConfig
+-- Looking for hwloc_topology_init
+-- Looking for hwloc_topology_init - found
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/FindMorseCommon.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:34 (include)
+  cmake_modules/morse_cmake/modules/find/FindMETIS.cmake:56 (include)
+  CMakeLists.txt:407 (find_package)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/LibrariesAbsolutePath.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:40 (include)
+  cmake_modules/morse_cmake/modules/find/FindMETIS.cmake:56 (include)
+  CMakeLists.txt:407 (find_package)
+
+
+-- Looking for METIS_NodeND
+-- Looking for METIS_NodeND - found
+-- Performing Test METIS_Idx_4
+-- Performing Test METIS_Idx_4 - Success
+-- Performing Test METIS_Idx_8
+-- Performing Test METIS_Idx_8 - Failed
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/FindMorseCommon.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:34 (include)
+  cmake_modules/morse_cmake/modules/find/FindGTG.cmake:54 (include)
+  CMakeLists.txt:425 (find_package)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/LibrariesAbsolutePath.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:40 (include)
+  cmake_modules/morse_cmake/modules/find/FindGTG.cmake:54 (include)
+  CMakeLists.txt:425 (find_package)
+
+
+-- Checking for one of the modules 'gtg'
+-- Use internal SPM
+CMake Deprecation Warning at spm/CMakeLists.txt:14 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at cmake_modules/CheckSystem.cmake:2 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  spm/CMakeLists.txt:98 (include)
+
+
+-- Building for target x86_64
+-- Found target X86_64
+CMAKE_Fortran_COMPILER full path: /nfsapps/ubuntu-24.04/opt/rocm-7.2.4/llvm/bin/amdflang
+Fortran compiler: amdflang
+No optimized Fortran compiler flags are known, we just try -O2...
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/FindMorseCommon.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:34 (include)
+  cmake_modules/morse_cmake/modules/find/FindCBLAS.cmake:83 (include)
+  spm/CMakeLists.txt:123 (find_package)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/LibrariesAbsolutePath.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:40 (include)
+  cmake_modules/morse_cmake/modules/find/FindCBLAS.cmake:83 (include)
+  spm/CMakeLists.txt:123 (find_package)
+
+
+-- Looking for Fortran openblas_set_num_threads
+-- Looking for Fortran openblas_set_num_threads - found
+-- CBLAS_BLAS BLAS
+-- Looking for cblas_dscal
+-- Looking for cblas_dscal - found
+-- Looking for cblas_zgemm3m
+-- Looking for cblas_zgemm3m - found
+-- Looking for cblas_cgemm3m
+-- Looking for cblas_cgemm3m - found
+-- CBLAS_WORKS 1
+-- Looking for cblas: test with blas succeeded
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/FindMorseCommon.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:34 (include)
+  cmake_modules/morse_cmake/modules/find/FindLAPACKE.cmake:78 (include)
+  spm/CMakeLists.txt:124 (find_package)
+
+
+CMake Deprecation Warning at cmake_modules/morse_cmake/modules/find/LibrariesAbsolutePath.cmake:22 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  cmake_modules/morse_cmake/modules/find/FindMorseInit.cmake:40 (include)
+  cmake_modules/morse_cmake/modules/find/FindLAPACKE.cmake:78 (include)
+  spm/CMakeLists.txt:124 (find_package)
+
+
+-- Looking for LAPACKE_dgeqrf
+-- Looking for LAPACKE_dgeqrf - found
+-- Looking for LAPACKE_dlascl_work
+-- Looking for LAPACKE_dlascl_work - found
+-- Looking for lapacke: test with lapack succeeded
+-- Add definition LAPACKE_WITH_LASSQ
+-- Add definition LAPACKE_WITH_LASCL
+-- Generate precision dependencies in /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/spm
+-- Generate precision dependencies in /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/spm - Done
+CMake Deprecation Warning at cmake_modules/CheckSystem.cmake:2 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  spm/src/CMakeLists.txt:15 (include)
+
+
+-- Building for target x86_64
+-- Found target X86_64
+CMAKE_Fortran_COMPILER full path: /nfsapps/ubuntu-24.04/opt/rocm-7.2.4/llvm/bin/amdflang
+Fortran compiler: amdflang
+No optimized Fortran compiler flags are known, we just try -O2...
+-- Generate precision dependencies in /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/spm/src
+-- Generate precision dependencies in /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/spm/src - Done
+CMake Deprecation Warning at spm/examples/CMakeLists.txt:13 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Generate precision dependencies in /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/spm/tests
+-- Generate precision dependencies in /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/spm/tests - Done
+-- --- Python and Julia wrappers are disabled with static libraries
+-- No installation of spm_env - already in the default environment
+-- No installation of pastix_env - already in the default environment
+
+Configuration of Pastix:
+       PASTIX_VERSION ......: 6.4.0
+       BUILD_TYPE ..........: Release
+       BUILDNAME ...........: 
+       SITE ................: 
+
+       Compiler: C .........: /usr/bin/cc (GNU)
+       Compiler: Fortran ...: /nfsapps/ubuntu-24.04/opt/rocm-7.2.4/llvm/bin/amdflang (LLVMFlang)
+       Linker: .............: /usr/bin/ld
+
+       Build type ..........: Release
+       Build shared ........: OFF
+       CFlags ..............:  -Wall -Wextra -mcx16 -Drestrict=
+       LDFlags .............: 
+       EXE LDFlags .........: 
+
+       Implementation paradigm
+       MPI .................: OFF
+       CUDA ................: OFF
+
+       Ordering selected
+       METIS ...............: ON
+
+       Runtime specific
+       Kernels specific
+       CBLAS ...............: TRUE
+       LAPACKE .............: TRUE
+       HWLOC ...............: TRUE
+
+       Trace ...............: OFF
+
+       Binaries to build
+       documentation .......: OFF
+       testing .............: 
+       precisions ..........: sdcz
+
+       INSTALL_PREFIX ......: /usr/local
+
+
+-- Configuration is done - A summary of the current configuration
+   has been written in /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/build-mi300a-core/config.log
+-- Configuring done (76.6s)
+CMake Warning (dev) at CMakeLists.txt:684 (add_library):
+  Policy CMP0069 is not set: INTERPROCEDURAL_OPTIMIZATION is enforced when
+  enabled.  Run "cmake --help-policy CMP0069" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+  INTERPROCEDURAL_OPTIMIZATION property will be ignored for target 'pastix'.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) at kernels/CMakeLists.txt:103 (add_library):
+  Policy CMP0069 is not set: INTERPROCEDURAL_OPTIMIZATION is enforced when
+  enabled.  Run "cmake --help-policy CMP0069" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+  INTERPROCEDURAL_OPTIMIZATION property will be ignored for target
+  'pastix_kernels'.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Generating done (4.1s)
+-- Build files have been written to: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/build-mi300a-core
+[  0%] Built target bcsc_headers_tgt
+[  0%] Built target refinement_headers_tgt
+[  0%] Built target low_precision_headers_tgt
+[  1%] Built target kernels_headers_tgt
+[  1%] Built target spm_headers_tgt
+[  2%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_2dense.c.o
+[  2%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_2dense.c.o
+[  2%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_dof_extend.c.o
+[  3%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_2dense.c.o
+[  3%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_2dense.c.o
+[  3%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_dof_extend.c.o
+[  3%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_dof_extend.c.o
+[  4%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_dof_extend.c.o
+[  4%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_norm.c.o
+[  6%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_norm.c.o
+[  6%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_norm.c.o
+[  6%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_norm.c.o
+[  6%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_scal.c.o
+[  6%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_scal.c.o
+[  7%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_scal.c.o
+[  7%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_scal.c.o
+[  7%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_rhs.c.o
+[  7%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_rhs.c.o
+[  8%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_rhs.c.o
+[  8%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_rhs.c.o
+[  8%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_convert_to_csc.c.o
+[  9%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_convert_to_csc.c.o
+[  9%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_convert_to_csc.c.o
+[  9%] Building C object spm/src/CMakeFiles/spm.dir/p_spm_convert_to_csc.c.o
+[ 10%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_convert_to_csc.c.o
+[ 10%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_convert_to_csr.c.o
+[ 10%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_convert_to_csr.c.o
+[ 10%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_convert_to_csr.c.o
+[ 12%] Building C object spm/src/CMakeFiles/spm.dir/p_spm_convert_to_csr.c.o
+[ 12%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_convert_to_csr.c.o
+[ 12%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_convert_to_ijv.c.o
+[ 13%] Building C object spm/src/CMakeFiles/spm.dir/p_spm_convert_to_ijv.c.o
+[ 13%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_convert_to_ijv.c.o
+[ 13%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_convert_to_ijv.c.o
+[ 13%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_convert_to_ijv.c.o
+[ 14%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_expand.c.o
+[ 14%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_expand.c.o
+[ 14%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_expand.c.o
+[ 14%] Building C object spm/src/CMakeFiles/spm.dir/p_spm_expand.c.o
+[ 15%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_expand.c.o
+[ 15%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_genrhs.c.o
+[ 15%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_genrhs.c.o
+[ 16%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_genrhs.c.o
+[ 16%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_genrhs.c.o
+[ 16%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_genmat.c.o
+[ 18%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_genmat.c.o
+[ 18%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_genmat.c.o
+[ 18%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_genmat.c.o
+[ 18%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_integer.c.o
+[ 19%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_integer.c.o
+[ 19%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_integer.c.o
+[ 19%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_integer.c.o
+[ 19%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_laplacian.c.o
+[ 20%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_laplacian.c.o
+[ 20%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_laplacian.c.o
+[ 20%] Building C object spm/src/CMakeFiles/spm.dir/p_spm_laplacian.c.o
+[ 21%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_laplacian.c.o
+[ 21%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_matrixvector.c.o
+[ 21%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_matrixvector.c.o
+[ 21%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_matrixvector.c.o
+[ 22%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_matrixvector.c.o
+[ 22%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_mergeduplicate.c.o
+[ 22%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_mergeduplicate.c.o
+[ 22%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_mergeduplicate.c.o
+[ 24%] Building C object spm/src/CMakeFiles/spm.dir/p_spm_mergeduplicate.c.o
+[ 24%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_mergeduplicate.c.o
+[ 24%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_print.c.o
+[ 25%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_print.c.o
+[ 25%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_print.c.o
+[ 25%] Building C object spm/src/CMakeFiles/spm.dir/p_spm_print.c.o
+[ 25%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_print.c.o
+[ 26%] Building C object spm/src/CMakeFiles/spm.dir/s_spm_sort.c.o
+[ 26%] Building C object spm/src/CMakeFiles/spm.dir/z_spm_sort.c.o
+[ 26%] Building C object spm/src/CMakeFiles/spm.dir/c_spm_sort.c.o
+[ 27%] Building C object spm/src/CMakeFiles/spm.dir/p_spm_sort.c.o
+[ 27%] Building C object spm/src/CMakeFiles/spm.dir/d_spm_sort.c.o
+[ 27%] Building C object spm/src/CMakeFiles/spm.dir/spm.c.o
+[ 27%] Building C object spm/src/CMakeFiles/spm.dir/spm_rhs.c.o
+[ 28%] Building C object spm/src/CMakeFiles/spm.dir/spm_dof_extend.c.o
+[ 28%] Building C object spm/src/CMakeFiles/spm.dir/spm_degree.c.o
+[ 28%] Building C object spm/src/CMakeFiles/spm.dir/spm_gen_fake_values.c.o
+[ 30%] Building C object spm/src/CMakeFiles/spm.dir/spm_io.c.o
+[ 30%] Building C object spm/src/CMakeFiles/spm.dir/spm_integers.c.o
+[ 30%] Building C object spm/src/CMakeFiles/spm.dir/spm_read_driver.c.o
+[ 30%] Building C object spm/src/CMakeFiles/spm.dir/spm_symmetrize.c.o
+[ 31%] Building C object spm/src/CMakeFiles/spm.dir/spm_update_compute_fields.c.o
+[ 31%] Building C object spm/src/CMakeFiles/spm.dir/drivers/iohb.c.o
+[ 31%] Building C object spm/src/CMakeFiles/spm.dir/drivers/mmio.c.o
+[ 32%] Building C object spm/src/CMakeFiles/spm.dir/drivers/laplacian.c.o
+[ 32%] Building C object spm/src/CMakeFiles/spm.dir/drivers/readhb.c.o
+[ 32%] Building C object spm/src/CMakeFiles/spm.dir/drivers/readijv.c.o
+[ 32%] Building C object spm/src/CMakeFiles/spm.dir/drivers/readmm.c.o
+[ 33%] Building C object spm/src/CMakeFiles/spm.dir/spm_nompi.c.o
+[ 33%] Linking C static library libspm.a
+[ 59%] Built target spm
+[ 66%] Built target pastix_kernels
+[ 67%] Building CXX object CMakeFiles/pastix.dir/common/src/device_backend_state.cpp.o
+[ 67%] Linking CXX static library libpastix.a
+[ 98%] Built target pastix
+[ 98%] Linking CXX executable simple_solve_and_refine
+[100%] Built target simple_solve_and_refine

@@ -1,0 +1,6 @@
+HIP version: 6.4.43484-123eb5128
+AMD clang version 19.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-6.4.2 25224 d366fa84f3fdcbd4b10847ebd5db572ae12a34fb)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /nfsapps/ubuntu-24.04/opt/rocm-6.4.2/lib/llvm/bin
+Configuration file: /nfsapps/ubuntu-24.04/opt/rocm-6.4.2/lib/llvm/bin/clang++.cfg
