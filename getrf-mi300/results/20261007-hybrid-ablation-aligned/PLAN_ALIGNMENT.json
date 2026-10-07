@@ -1,0 +1,8 @@
+{
+  "exact_plan_match": true,
+  "reference_case_filter": "n <= 16384",
+  "previous_full_cases": 116,
+  "cases": 113,
+  "runs": 678,
+  "paired_samples": 18300
+}

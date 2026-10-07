@@ -14,6 +14,7 @@
 |---|---|---|
 | [完整测试](getrf-mi300/results/20261006-current/REPORT.md) | 116 组配置、348 次运行、9,240 对样本 | 345 次通过；任意随机输入 n=2048 的 3 次运行失败 |
 | [n=2048 重测](getrf-mi300/results/20261006T095710Z-n2048-retest/REPORT.md) | 对角占优输入、3 轮、90 对样本 | 全部通过 |
+| [Hybrid 消融测试](getrf-mi300/results/20261007-hybrid-ablation-aligned/REPORT.md) | 沿用完整测试的尺寸、输入与布局，n≤16384；113 组配置、两版本各 3 轮、18,300 对样本 | 全部 678 次运行已完成；672 次通过；任意随机输入 n=2048 的两版本各 3 次失败 |
 | [PaStiX CDLS + 1D update1](pastix-cdls/results/20261006-cdls-update1-mi300a/README.md) | 10 个稀疏矩阵，每个 3 次独立运行 | 30/30 残差通过且 refinement=0；其中 21 次前向误差检查未通过，按指定条件纳入 |
 | [audikw_1 实际 GETRF 执行粒度](pastix-getrf/README.md) | 10,898 次对角调用分布；3 个真实输入、270 对计时、18 次完整调用 trace | 18 份 GETRF 验证通过；完整 solver 的严格前向误差检查失败、退出 255，原样保留 |
 
@@ -24,6 +25,18 @@ kernel 数分别由 rocSOLVER 的 36/66 降至 CDLS 的 4/4；无 profiler 中�
 三个精确 pair 覆盖 0.4221% 调用；不据此外推全分解覆盖或将全部收益归因于 launch overhead。
 本批次取每后端 90 个样本的总体中位数，并保留逐 trial 统计及全部原始样本。
 旧 ROCm 6.4.2 dense 数据和 hybrid 历史库存独立归档。
+
+2026-10-07 的 hybrid 消融在相同 MI300A、输入、计时与验证口径下，比较生产
+hybrid 路径与关闭 hybrid 后的融合 CK 路径。主尺寸 n=8192 和 n=16384 的 hybrid
+加速比分别为 **1.484×** 和 **2.173×**；n=16384 的中位延迟为 hybrid
+**103.987 ms**、无 hybrid **225.450 ms**。任意随机输入 n=2048 的 6 次失败
+单独保留并排除于有效性能结论；超过 16384 的历史记录仅存于排除目录。
+论文可直接使用[大尺寸性能图 PDF](getrf-mi300/results/20261007-hybrid-ablation-aligned/hybrid-ablation-large.pdf)、
+[英文图注](getrf-mi300/results/20261007-hybrid-ablation-aligned/PAPER_CAPTION.txt)、
+[汇总 CSV](getrf-mi300/results/20261007-hybrid-ablation-aligned/summary.csv)和
+[输入与布局说明](getrf-mi300/results/20261007-hybrid-ablation-aligned/INPUTS_LAYOUT.md)。
+[完整资料 ZIP](getrf-mi300/exports/getrf-hybrid-ablation-mi300-n16384-2026-10-07.zip)附
+[SHA-256](getrf-mi300/exports/getrf-hybrid-ablation-mi300-n16384-2026-10-07.zip.sha256)。
 
 n=2048 重测的 CDLS 中位延迟为 **1.716088 ms**，rocSOLVER 无 pivot 路径为
 **4.269848 ms**，加速比 **2.488×**。与上次 CDLS 1.722758 ms 的结果基本一致。

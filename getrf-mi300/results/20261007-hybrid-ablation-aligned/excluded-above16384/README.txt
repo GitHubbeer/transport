@@ -1,0 +1,1 @@
+These completed measurements were made before the user capped the formal evaluation at n=16384. They are excluded from samples.csv, summary.csv, REPORT.md and every formal figure. The incomplete third-trial n32768 hybrid run was terminated when the cap was requested.

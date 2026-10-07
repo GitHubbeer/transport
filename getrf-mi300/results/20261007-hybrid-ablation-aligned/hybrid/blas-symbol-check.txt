@@ -1,0 +1,4 @@
+                 U rocblas_create_handle
+                 U rocblas_destroy_handle
+                 U rocblas_dgemm
+                 U rocblas_set_stream

@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "exact_previous_plan_with_max_n": 16384,
+  "cases": 113,
+  "unique_runs": 678,
+  "paired_samples": 18300,
+  "validated_runs": 672,
+  "known_numerical_failures": 6,
+  "failed_case": "random / n=2048 / both variants / three trials",
+  "frozen_binary_library_hashes_verified": true,
+  "exact_sample_counts_and_n_lda_verified": true,
+  "numerical_tests": "Both ON and OFF builds: scheduling and GPU numerics PASS",
+  "paper_figure_visually_checked": true
+}

@@ -1,0 +1,10 @@
+Internal ctest changing into directory: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/build/getrf-hybrid-ablation
+Test project /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/cdls/build/getrf-hybrid-ablation
+    Start 1: getrf_schedule
+1/2 Test #1: getrf_schedule ...................   Passed    0.33 sec
+    Start 2: getrf_rocm_numerics
+2/2 Test #2: getrf_rocm_numerics ..............   Passed    3.54 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   3.90 sec

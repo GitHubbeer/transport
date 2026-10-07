@@ -1,0 +1,33 @@
+device=AMD Instinct MI300A arch=gfx942:sramecc+:xnack- HIP=60443484 CUs=228 memory_bytes=137438953472 rocSOLVER=3.28.2.1b897f5 rocBLAS=4.4.1.f08d23e3 baseline=rocsolver_dgetrf_npvt fp64 seed=20261001 method=auto matrix=dense n=2047 lda=2047 offset=0 warmup=5 repeats=30
+validate n=2047 lda=2047 kind=dense info=7/0 L_rel=6.9560e-16 U_rel=1.6442e-15 residual_scaled=3.5988e-03/5.7619e-04 PASS
+sample n=2047 lda=2047 iteration=0 first=cdls cdls_ms=1.722522020 rocsolver_ms=4.373067856 cdls_submit_ms=0.007902000 roc_submit_ms=2.340100000 cdls_wall_ms=1.741732000 roc_wall_ms=4.382243000
+sample n=2047 lda=2047 iteration=1 first=rocsolver cdls_ms=1.746039033 rocsolver_ms=4.846485138 cdls_submit_ms=0.011167000 roc_submit_ms=4.414823000 cdls_wall_ms=1.753340000 roc_wall_ms=4.854978000
+sample n=2047 lda=2047 iteration=2 first=cdls cdls_ms=1.730093956 rocsolver_ms=4.233054161 cdls_submit_ms=0.008684000 roc_submit_ms=2.320871000 cdls_wall_ms=1.874386000 roc_wall_ms=4.242298000
+sample n=2047 lda=2047 iteration=3 first=rocsolver cdls_ms=1.761582971 rocsolver_ms=4.844672203 cdls_submit_ms=0.015413000 roc_submit_ms=4.253626000 cdls_wall_ms=1.771077000 roc_wall_ms=4.851222000
+sample n=2047 lda=2047 iteration=4 first=cdls cdls_ms=1.723603964 rocsolver_ms=4.369222164 cdls_submit_ms=0.013931000 roc_submit_ms=2.392641000 cdls_wall_ms=1.731206000 roc_wall_ms=4.378307000
+sample n=2047 lda=2047 iteration=5 first=rocsolver cdls_ms=1.767791986 rocsolver_ms=4.853055000 cdls_submit_ms=0.019289000 roc_submit_ms=4.322141000 cdls_wall_ms=1.777197000 roc_wall_ms=4.860827000
+sample n=2047 lda=2047 iteration=6 first=cdls cdls_ms=1.725366950 rocsolver_ms=4.370315075 cdls_submit_ms=0.013811000 roc_submit_ms=2.427965000 cdls_wall_ms=1.734000000 roc_wall_ms=4.378567000
+sample n=2047 lda=2047 iteration=7 first=rocsolver cdls_ms=1.810657978 rocsolver_ms=4.857902050 cdls_submit_ms=0.029726000 roc_submit_ms=4.351115000 cdls_wall_ms=1.818279000 roc_wall_ms=4.866126000
+sample n=2047 lda=2047 iteration=8 first=cdls cdls_ms=1.698405027 rocsolver_ms=4.373750210 cdls_submit_ms=0.009174000 roc_submit_ms=2.371008000 cdls_wall_ms=1.705787000 roc_wall_ms=4.381532000
+sample n=2047 lda=2047 iteration=9 first=rocsolver cdls_ms=1.758898020 rocsolver_ms=4.806663990 cdls_submit_ms=0.017096000 roc_submit_ms=4.355342000 cdls_wall_ms=1.765648000 roc_wall_ms=4.815037000
+sample n=2047 lda=2047 iteration=10 first=cdls cdls_ms=1.708461046 rocsolver_ms=4.360269070 cdls_submit_ms=0.009154000 roc_submit_ms=2.371889000 cdls_wall_ms=1.716323000 roc_wall_ms=4.371236000
+sample n=2047 lda=2047 iteration=11 first=rocsolver cdls_ms=1.745437026 rocsolver_ms=4.833734989 cdls_submit_ms=0.015844000 roc_submit_ms=4.409014000 cdls_wall_ms=1.753481000 roc_wall_ms=4.841177000
+sample n=2047 lda=2047 iteration=12 first=cdls cdls_ms=1.688269973 rocsolver_ms=4.392979145 cdls_submit_ms=0.009364000 roc_submit_ms=2.379781000 cdls_wall_ms=1.697233000 roc_wall_ms=4.403115000
+sample n=2047 lda=2047 iteration=13 first=rocsolver cdls_ms=1.776044965 rocsolver_ms=4.944303989 cdls_submit_ms=0.030416000 roc_submit_ms=4.372919000 cdls_wall_ms=1.783597000 roc_wall_ms=4.951717000
+sample n=2047 lda=2047 iteration=14 first=cdls cdls_ms=1.731737018 rocsolver_ms=4.375542164 cdls_submit_ms=0.013100000 roc_submit_ms=2.346160000 cdls_wall_ms=1.741091000 roc_wall_ms=4.384757000
+sample n=2047 lda=2047 iteration=15 first=rocsolver cdls_ms=1.746759057 rocsolver_ms=4.949994087 cdls_submit_ms=0.019049000 roc_submit_ms=4.259915000 cdls_wall_ms=1.755353000 roc_wall_ms=4.958898000
+sample n=2047 lda=2047 iteration=16 first=cdls cdls_ms=1.713068008 rocsolver_ms=4.279604912 cdls_submit_ms=0.014211000 roc_submit_ms=2.369586000 cdls_wall_ms=1.722172000 roc_wall_ms=4.289070000
+sample n=2047 lda=2047 iteration=17 first=rocsolver cdls_ms=1.762302995 rocsolver_ms=4.890381813 cdls_submit_ms=0.014011000 roc_submit_ms=4.282731000 cdls_wall_ms=1.770827000 roc_wall_ms=4.897683000
+sample n=2047 lda=2047 iteration=18 first=cdls cdls_ms=1.872392058 rocsolver_ms=4.369924068 cdls_submit_ms=0.143570000 roc_submit_ms=2.358968000 cdls_wall_ms=1.880064000 roc_wall_ms=4.382283000
+sample n=2047 lda=2047 iteration=19 first=rocsolver cdls_ms=1.743914962 rocsolver_ms=4.784140110 cdls_submit_ms=0.016525000 roc_submit_ms=4.389775000 cdls_wall_ms=1.753330000 roc_wall_ms=4.792843000
+sample n=2047 lda=2047 iteration=20 first=cdls cdls_ms=1.732257009 rocsolver_ms=4.221255779 cdls_submit_ms=0.014973000 roc_submit_ms=2.314220000 cdls_wall_ms=1.741692000 roc_wall_ms=4.230581000
+sample n=2047 lda=2047 iteration=21 first=rocsolver cdls_ms=1.756093979 rocsolver_ms=4.868938923 cdls_submit_ms=0.016015000 roc_submit_ms=4.419651000 cdls_wall_ms=1.765629000 roc_wall_ms=4.876311000
+sample n=2047 lda=2047 iteration=22 first=cdls cdls_ms=1.768152952 rocsolver_ms=4.399488926 cdls_submit_ms=0.072441000 roc_submit_ms=2.373882000 cdls_wall_ms=1.777096000 roc_wall_ms=4.408082000
+sample n=2047 lda=2047 iteration=23 first=rocsolver cdls_ms=1.775964022 rocsolver_ms=4.857602119 cdls_submit_ms=0.018478000 roc_submit_ms=4.374451000 cdls_wall_ms=1.782505000 roc_wall_ms=4.866175000
+sample n=2047 lda=2047 iteration=24 first=cdls cdls_ms=1.746479034 rocsolver_ms=4.231832027 cdls_submit_ms=0.007972000 roc_submit_ms=2.356736000 cdls_wall_ms=1.754772000 roc_wall_ms=4.242739000
+sample n=2047 lda=2047 iteration=25 first=rocsolver cdls_ms=1.753168941 rocsolver_ms=4.878593922 cdls_submit_ms=0.015164000 roc_submit_ms=4.398378000 cdls_wall_ms=1.760872000 roc_wall_ms=4.887097000
+sample n=2047 lda=2047 iteration=26 first=cdls cdls_ms=1.711385012 rocsolver_ms=4.307868004 cdls_submit_ms=0.009845000 roc_submit_ms=2.329934000 cdls_wall_ms=1.861857000 roc_wall_ms=4.316773000
+sample n=2047 lda=2047 iteration=27 first=rocsolver cdls_ms=1.792750001 rocsolver_ms=4.849288940 cdls_submit_ms=0.015023000 roc_submit_ms=4.281669000 cdls_wall_ms=1.801143000 roc_wall_ms=4.856341000
+sample n=2047 lda=2047 iteration=28 first=cdls cdls_ms=1.699767947 rocsolver_ms=4.381512165 cdls_submit_ms=0.014582000 roc_submit_ms=2.377237000 cdls_wall_ms=1.708702000 roc_wall_ms=4.392618000
+sample n=2047 lda=2047 iteration=29 first=rocsolver cdls_ms=1.736544013 rocsolver_ms=4.949623108 cdls_submit_ms=0.015394000 roc_submit_ms=4.429606000 cdls_wall_ms=1.743405000 roc_wall_ms=4.957866000
+bench n=2047 lda=2047 repeats=30 cdls_median_ms=1.745738 rocsolver_median_ms=4.591815 cdls_mean_ms=1.746864 rocsolver_mean_ms=4.601836 cdls_gflops=3274.341858 workspace_bytes=4104 roc_workspace_bytes=8926400 cdls_submit_ms=0.014998 roc_submit_ms=3.340795 cdls_wall_ms=1.755062 roc_wall_ms=4.600463 rocsolver_gflops=1244.854965 speedup=2.630300

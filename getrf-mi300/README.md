@@ -78,3 +78,33 @@ source hashes, exact commands, environment/library identities, raw logs, parsed
 samples, validation results and summaries. A completed sweep with numerical
 stress failures has metadata status FAIL and lists every failing case; completion
 and numerical validity are separate in the report.
+
+## Hybrid ablation through n=16384 (2026-10-07)
+
+[The completed ablation](results/20261007-hybrid-ablation-aligned/REPORT.md)
+reuses the previous sweep's exact sizes, inputs, layouts, warmups and repeats,
+filtered to n<=16384. Both builds use the same source and benchmark; the
+`CDLS_GETRF_ENABLE_HYBRID` build option selects the production hybrid path or
+the existing fused CK path for the full matrix. There are 113 configurations,
+three trials per build, 678 completed runs and 18,300 alternating paired samples.
+The six arbitrary-random n=2048 failures are retained and excluded from valid
+performance claims; 672 runs pass numerical validation. Metadata status `FAIL`
+describes those numerical failures; `execution_complete: true` records completion.
+
+At n=8192 and n=16384, hybrid is respectively 1.484x and 2.173x faster than
+the fused-only build. These measurements describe the archived implementation
+on MI300A. The [input/layout inventory](results/20261007-hybrid-ablation-aligned/INPUTS_LAYOUT.md)
+and [plan alignment](results/20261007-hybrid-ablation-aligned/PLAN_ALIGNMENT.json)
+document the comparison against the previous sweep.
+
+- [Large-matrix figure (PDF)](results/20261007-hybrid-ablation-aligned/hybrid-ablation-large.pdf)
+- [Paper caption](results/20261007-hybrid-ablation-aligned/PAPER_CAPTION.txt)
+- [Summary](results/20261007-hybrid-ablation-aligned/summary.csv) and [raw samples](results/20261007-hybrid-ablation-aligned/samples.csv)
+- [Reproduction workflow](HYBRID_ABLATION.md), [measurement driver](ablate_hybrid.py) and [report/plot helper](report_hybrid_inputs.py)
+- [Complete ZIP](exports/getrf-hybrid-ablation-mi300-n16384-2026-10-07.zip) and [SHA-256](exports/getrf-hybrid-ablation-mi300-n16384-2026-10-07.zip.sha256)
+
+The result directory preserves both frozen libraries, numerical test logs,
+source snapshots, exact commands, environment records and all raw logs.
+Records above n=16384 are archived only in `excluded-above16384/` and
+`excluded-commands.json`; they do not enter the official summary, samples or figures.
+The reproduction commands follow the original CDLS repository layout, as above.
