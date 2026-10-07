@@ -1,0 +1,101 @@
++-------------------------------------------------+
++     PaStiX : Parallel Sparse matriX package     +
++-------------------------------------------------+
+  Version:                                   6.4.0
+  Schedulers:
+    sequential:                            Enabled
+    thread static:                         Started
+    thread dynamic:                       Disabled
+  Number of MPI processes:                       1
+  Number of threads per process:                 2
+  Number of GPUs:                                0
+  MPI communication support:              PastixMpiNone
+  Distribution level:                     1D(   0)
+  Blocking size (min/max):              160 /  320
+  Computational models
+    CPU:           AMD Instinct MI300A Accelerator
+    GPU:                             CUDA disabled
+PaStiX explicit device backend: /shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261006-cdls-update1-mi300a/binaries/cdls.so; pool budget: 34359738368 bytes
+  Matrix type:  Symmetric
+  Arithmetic:   Double
+  Format:       IJV
+  N:            18000
+  nnz:          3457658
++-------------------------------------------------+
+  Ordering subtask :
+    Ordering method is: Metis
+    Time to compute ordering              8.868327e-01 s
++-------------------------------------------------+
+  Symbolic factorization subtask:
+    Symbol factorization using: Fax Direct
+    Number of nonzeroes in L structure    43109854
+    Fill-in of L                          12.467935
+    Time to compute symbol matrix         2.538037e-02 s
++-------------------------------------------------+
+  Reordering subtask:
+    Split level                                  0
+    Stoping criterion                           -1
+    Time for reordering                   1.534147e-01 s
++-------------------------------------------------+
+  Mapping/Scheduling subtask:
+    Number of non-zeroes in blocked L     86219708
+    Fill-in                               24.935869
+    Number of operations in full-rank: LU       230.06 GFlops
+    Prediction:
+      Model                              AMD 6180  MKL
+      Time to factorize                   7.825463e+00 s
+    Time for mapping/scheduling           3.905296e-04 s
++-------------------------------------------------+
+  Analyze task:
+    Total time for analyze                1.324701e+00 s
++-------------------------------------------------+
+  Factorization task:
+    Factorization used: LU
+    Time to initialize internal csc       3.142262e-01 s
+    Time to initialize coeftab            9.407496e-02 s
+PaStiX FP64 Numfact device backend: hip-hipmm-cdls-getrf
+PaStiX FP64 device layout: 1D
+    Time to factorize                     4.451416e-01 s (516.83 GFlop/s)
+    Number of operations                       135.20 GFlops
+    Number of static pivots                      0
+    Memory usage of coeftab                        692 Mo
+    Time to solve                         3.973842e-02 s
+    Time for refinement                   3.438711e-03 s
+   || A ||_1                                               2.868192e-02
+   max(|| b_i ||_oo)                                       9.034422e-03
+   max(|| x_i ||_oo)                                       4.999480e-01
+   max(|| b_i - A x_i ||_2 / || b_i ||_2)                  8.838137e-16
+   max(|| b_i - A x_i ||_1)                                1.762765e-16
+   max(|| b_i - A x_i ||_1 / (||A||_1 * ||x_i||_oo * eps)) 2.268846e-02 (SUCCESS)
+   || x_0 ||_oo                                            4.999480e-01
+   || x0_0 - x_0 ||_oo                                     5.821227e-11
+   || x0_0 - x_0 ||_oo / (||x0_0||_oo * eps)               1.164367e+02 (FAILED)
+   max(|| x_i ||_oo)                                       4.999480e-01
+   max(|| x0_i - x_i ||_oo)                                5.821227e-11
+   max(|| x0_i - x_i ||_oo / || x0_i ||_oo)                1.164367e+02 (FAILED)
+
+# Timing summary: PASTIX_TIMING,name,seconds
+PASTIX_TIMING,stage_options,3.504753113e-05
+PASTIX_TIMING,stage_init,1.893210411e-02
+PASTIX_TIMING,stage_read_matrix,7.613039017e-01
+PASTIX_TIMING,stage_spm_check,7.804107666e-02
+PASTIX_TIMING,stage_fake_values,0.000000000e+00
+PASTIX_TIMING,stage_analyze,1.324706078e+00
+PASTIX_TIMING,stage_normalize,6.736993790e-03
+PASTIX_TIMING,stage_numfact,8.594460487e-01
+PASTIX_TIMING,stage_rhs,2.994990349e-02
+PASTIX_TIMING,stage_solve_refine,4.364705086e-02
+PASTIX_TIMING,stage_axb_check,4.186391830e-02
+PASTIX_TIMING,stage_cleanup,6.859302521e-04
+PASTIX_TIMING,stage_finalize,1.430821419e-01
+PASTIX_TIMING,stage_total,4.797341108e+00
+PASTIX_TIMING,pastix_order,8.868327141e-01
+PASTIX_TIMING,pastix_symbfact,2.350759506e-02
+PASTIX_TIMING,pastix_reordering,1.534147263e-01
+PASTIX_TIMING,pastix_blend,3.905296326e-04
+PASTIX_TIMING,pastix_analyze,1.324701309e+00
+PASTIX_TIMING,pastix_numfact,4.451415539e-01
+PASTIX_TIMING,pastix_solve,3.973841667e-02
+PASTIX_TIMING,pastix_refine,3.438711166e-03
+PASTIX_REFINEMENT_ITERATIONS,0
+PASTIX_REFINEMENT_TOLERANCE,1.000000000e-12

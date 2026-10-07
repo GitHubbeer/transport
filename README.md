@@ -1,9 +1,12 @@
-# CDLS GETRF 的 MI300A 测试资料
+# CDLS GETRF 与 PaStiX 的 MI300A 测试资料
 
 本仓库归档基于 CK FP64 XDLops/MFMA 的 CDLS ROCm GETRF 测试，以及与 rocSOLVER 的比较。
-设备为 AMD Instinct MI300A（gfx942），软件为 ROCm 6.4.2。原始 CDLS 仓库为
+设备为 AMD Instinct MI300A（gfx942）。原有 dense GETRF 测试使用 ROCm 6.4.2，
+新增 PaStiX CDLS + 1D update1 测试使用 ROCm 7.2.4。原始 CDLS 仓库为
 [TheCoreTeam/cdls](https://github.com/TheCoreTeam/cdls)，测试基于 `dev-nvi-getrf` 分支
 `8be4f73` 及测试时的未提交修改；准确实现见各结果目录的源码快照和 `git-diff.txt`。
+新增 PaStiX 批次固定 CDLS 提交 `44067f1e654e5c4a593cc82c34cde4f4c48a62b2`，
+并归档对应 ROCm 源码、运行二进制和 PaStiX 工作区补丁。
 
 ## 测试结果
 
@@ -11,6 +14,7 @@
 |---|---|---|
 | [完整测试](getrf-mi300/results/20261006-current/REPORT.md) | 116 组配置、348 次运行、9,240 对样本 | 345 次通过；任意随机输入 n=2048 的 3 次运行失败 |
 | [n=2048 重测](getrf-mi300/results/20261006T095710Z-n2048-retest/REPORT.md) | 对角占优输入、3 轮、90 对样本 | 全部通过 |
+| [PaStiX CDLS + 1D update1](pastix-cdls/results/20261006-cdls-update1-mi300a/README.md) | 10 个稀疏矩阵，每个 3 次独立运行 | 30/30 残差通过且 refinement=0；其中 21 次前向误差检查未通过，按指定条件纳入 |
 
 n=2048 重测的 CDLS 中位延迟为 **1.716088 ms**，rocSOLVER 无 pivot 路径为
 **4.269848 ms**，加速比 **2.488×**。与上次 CDLS 1.722758 ms 的结果基本一致。
@@ -25,6 +29,7 @@ n=2048 重测的 CDLS 中位延迟为 **1.716088 ms**，rocSOLVER 无 pivot 路�
 
 - `getrf-mi300/`：benchmark、测试计划、分析、绘图、压力测试及 trace 脚本。
 - `getrf-mi300/results/`：原始日志、CSV 样本与汇总、数值验证、环境和命令、报告及性能图。
+- `pastix-cdls/results/`：PaStiX 数值分解性能，包含逐次样本、汇总、原始日志、环境、固定二进制和 CDLS ROCm 源码快照。
 - 每个结果目录中的 `source/`、`benchmark`、`libcdls_rocm.so`：测试时的源码快照与二进制。
 - `MANIFEST.json`：文件 SHA-256 校验值；完整测试沿用原始清单，2048 重测补充归档清单。
 - `licenses/ck_getrf_notices/`：CK、rocBLAS、rocSOLVER 的上游许可和来源说明。

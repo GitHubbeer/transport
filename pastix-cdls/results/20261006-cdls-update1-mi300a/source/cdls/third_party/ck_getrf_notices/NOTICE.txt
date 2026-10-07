@@ -1,0 +1,24 @@
+The CUDA hybrid panel scheduling, inner-panel diagonal factorization,
+guarded reciprocal range, and bounded diagonal-first task order in
+src/cuda/getrf.cu were adapted from ck_getrf::factorize_hybrid and
+ck_getrf::diagonal in ck_getrf/src/getrf.cpp, and
+ck_getrf::task_tile_diagonal_first in ck_getrf/include/task_order.hpp, revision
+29d3ba1b67b390a43e16f963bdd87dcfe2ca4769.
+
+Upstream source notice:
+SPDX-License-Identifier: MIT AND BSD-2-Clause
+Copyright (c) 2018-2025 Advanced Micro Devices, Inc. All rights reserved.
+
+The accompanying CK, rocBLAS, and rocSOLVER notices are retained from that
+source repository. No AMD runtime or CK headers are required by this CUDA path.
+
+The ROCm CK/MFMA implementation in src/rocm/getrf/tiled.h was ported on
+2026-10-06 from the ../ck_getrf working tree (including its uncommitted
+optimizations). The imported src/getrf.cpp had SHA-256
+237c4e72c569ac46a587664ca6a94ceab73a76c23a17f80130f3f796ca1ff1c6;
+include/task_order.hpp had SHA-256
+2aa0e8f6997fa5461da463145925bc29d53990dbff5fb159627874422b73d18b.
+Shared task ordering, reciprocal guards, LU panel updates, triangular
+recurrences and hybrid traversal now live in src/common/getrf. AMD CK/DPP
+and NVIDIA MMA/cp.async implementations remain in their backend directories.
+ROCm uses CK headers pinned to a8c5bd9b9ad950c3e742877e01cb784da91664e3.

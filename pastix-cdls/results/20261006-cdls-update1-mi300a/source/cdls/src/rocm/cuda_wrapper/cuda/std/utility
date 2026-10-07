@@ -1,0 +1,9 @@
+#pragma once
+
+#include <utility>
+
+namespace cuda {
+namespace std {
+using ::std::swap;
+} // namespace std
+} // namespace cuda

@@ -1,0 +1,49 @@
+{
+  "start_utc": "2026-10-07T00:10:56.831565+00:00",
+  "command": [
+    "taskset",
+    "-c",
+    "0,1",
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261006-cdls-update1-mi300a/binaries/solver",
+    "--mm",
+    "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/matrix/dgreen.mtx",
+    "-g",
+    "1",
+    "-t",
+    "2",
+    "-s",
+    "1",
+    "-c",
+    "2",
+    "-i",
+    "iparm_tasks2d_level",
+    "0",
+    "-i",
+    "iparm_factorization",
+    "2",
+    "-i",
+    "iparm_gpu_update_strategy",
+    "1"
+  ],
+  "environment": {
+    "LD_LIBRARY_PATH": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261006-cdls-update1-mi300a/binaries:/nfsapps/ubuntu-24.04/opt/rocmplus-7.2.4/openblas-v0.3.33/lib:/nfsapps/ubuntu-24.04/opt/rocm-7.2.4/lib:/shared/apps/ubuntu/rocmplus-7.2.1/pdt/linux-zen3/flux-core-0.67.0-xvfz4i26hiars5qevuc6ttptp5f5yovv/lib:/shared/apps/ubuntu/rocmplus-7.2.1/pdt/linux-zen3/flux-security-0.14.0-ytj3zfgtnebuqgju3fjcf7v7koih57at/lib:/shared/apps/ubuntu/rocmplus-7.2.1/pdt/linux-zen3/flux-sched-0.36.1-obmcaqbkek76wvencclxofnomktmsk3w/lib::/usr/local/julia-1.12.5/lib:/usr/local/julia-1.12.5/lib",
+    "PASTIX_DEVICE_BACKEND": "/shared/prerelease/home/yuxi_hong_research_lws/jie/tingxuan/pastix-multidev-dev/results/20261006-cdls-update1-mi300a/binaries/cdls.so",
+    "PASTIX_DEVICE_POOL_BYTES": "34359738368",
+    "PASTIX_DEVICE_LAYOUT": "1d",
+    "PASTIX_GPU_UPDATE_STRATEGY": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "cpu_affinity": [
+    0,
+    1
+  ],
+  "end_utc": "2026-10-07T00:12:01.911260+00:00",
+  "exit_code": 255,
+  "wall_s": 65.07147161755711,
+  "stop_reason": null,
+  "minimum_available_host_bytes": 78069841920
+}
